@@ -1,0 +1,7 @@
+name = "3x-cloudxbeta" 
+main = "worker.js" 
+compatibility_date = "2026-06-20" 
+ 
+[[kv_namespaces]] 
+binding = "SESSIONS" 
+id = "146ed660f5e843bf88e7397402c4fef9" 
