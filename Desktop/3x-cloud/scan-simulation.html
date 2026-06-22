@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scanning — 3X Cloud</title>
+<link rel="icon" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;min-height:100vh;display:flex;flex-direction:column;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:#e2e2ea}
+.scan-page{flex:1;display:grid;place-items:center;padding:40px 20px}
+.sim-box{text-align:center;max-width:480px;width:100%}
+.sim-box h2{font-size:24px;margin-bottom:6px;color:#fff}
+.sim-sub{color:#6b7280;font-size:14px;margin-bottom:40px}
+.sim-ring-wrap{width:180px;height:180px;margin:0 auto 40px;position:relative}
+.sim-ring-wrap svg{width:100%;height:100%}
+.track{fill:none;stroke:rgba(123,97,255,.12);stroke-width:5}
+.prog{fill:none;stroke:#7b61ff;stroke-width:5;stroke-linecap:round;stroke-dasharray:440;stroke-dashoffset:440;transition:stroke-dashoffset .4s ease}
+.inner-ring{fill:none;stroke:#9f7eff;stroke-width:3;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset .4s ease}
+.spin-outer{animation:spin 3s linear infinite;transform-origin:center}
+.spin-inner{animation:spin-reverse 2s linear infinite;transform-origin:center}
+.particles{position:absolute;inset:-50px;pointer-events:none}
+.particle{position:absolute;width:2px;height:2px;background:rgba(255,255,255,.5);border-radius:50%}
+.sim-status{margin-bottom:28px}
+.sim-status h3{font-size:18px;margin-bottom:4px;font-weight:600;color:#fff}
+.sim-status p{font-size:13px;color:#6b7280}
+.sim-bar-wrap{width:100%;max-width:360px;margin:0 auto}
+.sim-bar{height:5px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+.sim-bar .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#7b61ff,#9f7eff);width:0%;transition:width .3s ease}
+.sim-pct{font-size:13px;color:#6b7280;font-family:'JetBrains Mono',monospace;margin-top:10px}
+.sim-details{margin-top:32px;text-align:left;max-width:400px;margin-inline:auto}
+.sim-detail-line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:#6b7280}
+.sim-detail-line span:last-child{color:#fff;font-weight:600}
+.result-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .5s ease}
+.result-overlay.show{opacity:1;pointer-events:auto}
+.result-card{text-align:center;max-width:420px;padding:40px 20px}
+.result-card .ri{width:80px;height:80px;border-radius:50%;display:grid;place-items:center;margin:0 auto 24px;font-size:32px}
+.result-card.clean .ri{background:rgba(16,185,129,.12);color:#10b981;border:2px solid rgba(16,185,129,.3)}
+.result-card.suspicious .ri{background:rgba(245,158,11,.12);color:#f59e0b;border:2px solid rgba(245,158,11,.3)}
+.result-card.threat .ri{background:rgba(239,68,68,.12);color:#ef4444;border:2px solid rgba(239,68,68,.3)}
+.result-card h2{font-size:32px;margin-bottom:8px}
+.result-card.clean h2{color:#10b981}
+.result-card.suspicious h2{color:#f59e0b}
+.result-card.threat h2{color:#ef4444}
+.result-card p{margin-bottom:24px;color:#9ca3af}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spin-reverse{to{transform:rotate(-360deg)}}
+</style>
+</head>
+<body>
+
+<div class="scan-page">
+  <div class="sim-box">
+    <div class="sim-ring-wrap">
+      <svg viewBox="0 0 160 160">
+        <circle class="track" cx="80" cy="80" r="70"/>
+        <g class="spin-outer"><circle class="prog" cx="80" cy="80" r="70" id="ringProgress"/></g>
+        <g class="spin-inner"><circle class="inner-ring" cx="80" cy="80" r="50" id="ringInner"/></g>
+      </svg>
+      <div class="particles" id="particles"></div>
+    </div>
+    <div class="sim-status">
+      <h3 id="simTitle">Initializing NAPSE scanner...</h3>
+      <p id="simDesc">Preparing forensic environment</p>
+    </div>
+    <div class="sim-bar-wrap">
+      <div class="sim-bar"><div class="fill" id="simProgress"></div></div>
+      <div class="sim-pct" id="simPercent">0%</div>
+    </div>
+    <div class="sim-details" id="simDetails">
+      <div class="sim-detail-line"><span>Status</span><span id="detailStatus">Loading detection modules</span></div>
+      <div class="sim-detail-line"><span>Progress</span><span id="detailProgress">0%</span></div>
+      <div class="sim-detail-line"><span>Elapsed</span><span id="detailElapsed">0s</span></div>
+      <div class="sim-detail-line"><span>Remaining</span><span id="detailRemaining">~12s</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card clean" id="resultCard">
+    <div class="ri">&#10003;</div>
+    <h2>Scan Complete</h2>
+    <p>No anomalies detected. Your system is clean.</p>
+    <a class="btn" href="scan-report.html?id=3X-8721" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;font-weight:700;font-size:14px;background:linear-gradient(135deg,#7b61ff,#9f7eff);color:#fff;text-decoration:none">View Report</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  const pContainer=document.getElementById('particles');
+  for(let i=0;i<20;i++){
+    const d=document.createElement('div');d.className='particle';
+    d.style.left=Math.random()*100+'%';d.style.top=Math.random()*100+'%';
+    d.style.animationDelay=Math.random()*3+'s';d.style.opacity=Math.random()*.5+.3;
+    pContainer.appendChild(d);
+  }
+
+  const steps=[
+    {pct:0,title:'Initializing NAPSE scanner...',desc:'Preparing forensic environment',detail:'Loading 40+ cheat signatures'},
+    {pct:3,title:'Loading behavior engine...',desc:'Initializing NAPSE patterns',detail:'20+ behavior patterns loaded'},
+    {pct:5,title:'Collecting artifacts...',desc:'Scanning system directories',detail:'Artifact collection started'},
+    {pct:8,title:'Analyzing processes...',desc:'Checking 247 active processes',detail:'Process enumeration active'},
+    {pct:12,title:'Deep forensic scan...',desc:'Multi-layer inspection running',detail:'Memory regions mapped'},
+    {pct:15,title:'Checking integrity...',desc:'Verifying process signatures',detail:'Signature database v3.0'},
+    {pct:18,title:'Scanning strings...',desc:'704+ detection strings active',detail:'Pattern matching in progress'},
+    {pct:22,title:'Deleted files recovery...',desc:'Scanning Recycle Bin & USN Journal',detail:'Recovering deleted artifacts'},
+    {pct:26,title:'Execution history check...',desc:'Analyzing Prefetch & Amcache',detail:'Program execution timeline'},
+    {pct:30,title:'Registry deep scan...',desc:'Checking persistence mechanisms',detail:'HKCU/HKLM Run keys'},
+    {pct:34,title:'Memory analysis...',desc:'Scanning for injected code',detail:'Byte patch detection active'},
+    {pct:38,title:'AMSI/ETW check...',desc:'Checking for defensive tampering',detail:'AMSI bypass & ETW patch scan'},
+    {pct:42,title:'Network artifacts...',desc:'Checking DNS cache & connections',detail:'Known cheat API endpoints'},
+    {pct:46,title:'Discord intelligence...',desc:'Cross-referencing cheat servers',detail:'214+ servers checked'},
+    {pct:50,title:'FiveM specific checks...',desc:'Cache & resource validation',detail:'Lua script integrity'},
+    {pct:55,title:'Alternate data streams...',desc:'Scanning for hidden payloads',detail:'ADS detection active'},
+    {pct:60,title:'Hidden file detection...',desc:'Zero-width character scan',detail:'Disguised extensions check'},
+    {pct:65,title:'WMI repository check...',desc:'Checking for WMI tampering',detail:'Repository integrity scan'},
+    {pct:70,title:'PowerShell analysis...',desc:'Checking for obfuscated scripts',detail:'Script block logging check'},
+    {pct:75,title:'Reviewing evidence...',desc:'Building evidence chain',detail:'Chain of custody established'},
+    {pct:80,title:'Behavior analysis...',desc:'Running NAPSE pattern engine',detail:'Staggered delete / timestomp check'},
+    {pct:85,title:'Finalizing report...',desc:'Compiling scan results',detail:'Classification algorithm running'},
+    {pct:90,title:'Uploading results...',desc:'Sending to cloud dashboard',detail:'Secure TLS connection'},
+    {pct:95,title:'Audit trail...',desc:'Archiving forensic evidence',detail:'SHA256 hashes generated'},
+    {pct:100,title:'Scan complete',desc:'NAPSE report generated',detail:'Redirecting to results...'}
+  ];
+
+  let currentStep=0, currentPct=0;
+  const totalDuration=15000, stepInterval=totalDuration/steps.length;
+
+  function updateUI(pct,step){
+    const circumference=440, innerCircumference=314;
+    const offset=circumference-(pct/100)*circumference;
+    const innerOffset=innerCircumference-(pct/100)*innerCircumference;
+    document.getElementById('ringProgress').style.strokeDashoffset=offset;
+    document.getElementById('ringInner').style.strokeDashoffset=innerOffset;
+    document.getElementById('simProgress').style.width=pct+'%';
+    document.getElementById('simPercent').textContent=pct+'%';
+    document.getElementById('simTitle').textContent=step.title;
+    document.getElementById('simDesc').textContent=step.desc;
+    document.getElementById('detailStatus').textContent=step.detail;
+    document.getElementById('detailProgress').textContent=pct+'%';
+    document.getElementById('detailElapsed').textContent=Math.floor(pct/100*15)+'s';
+    document.getElementById('detailRemaining').textContent='~'+Math.ceil((100-pct)/100*15)+'s';
+  }
+
+  function animate(){
+    if(currentStep>=steps.length){
+      setTimeout(()=>{
+        document.getElementById('resultOverlay').classList.add('show');
+        setTimeout(()=>location.href='scan-report.html?id=3X-8721',3000);
+      },500);
+      return;
+    }
+    const step=steps[currentStep];const targetPct=step.pct;
+    const stepDuration=stepInterval;const startTime=Date.now();const startPct=currentPct;
+    function frame(){
+      const elapsed=Date.now()-startTime;const progress=Math.min(elapsed/stepDuration,1);
+      currentPct=startPct+(targetPct-startPct)*progress;updateUI(Math.round(currentPct),step);
+      if(progress<1){requestAnimationFrame(frame);}else{currentStep++;setTimeout(animate,100);}
+    }
+    frame();
+  }
+  setTimeout(animate,800);
+})();
+</script>
+</body>
+</html>

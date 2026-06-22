@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide — 3X Cloud</title>
+<link rel="icon" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0f;color:#e2e2ea;line-height:1.6;overflow-x:hidden}
+::selection{background:rgba(123,97,255,.4);color:#fff}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(123,97,255,.08),transparent),radial-gradient(ellipse 60% 40% at 80% 0%,rgba(90,70,174,.05),transparent)}
+.container{width:min(1200px,calc(100% - 48px));margin:0 auto}
+
+.site-header{position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(10,10,15,.85);backdrop-filter:blur(20px)}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 24px;max-width:1200px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-.03em;font-size:20px;color:#fff;text-decoration:none}
+.brand img{width:36px;height:36px;border-radius:8px}
+.brand span{font-size:20px;color:#fff}
+.brand small{display:block;font-size:10px;color:#6b7280;letter-spacing:.15em;text-transform:uppercase;margin-top:-2px;font-weight:600}
+.nav-links{display:flex;align-items:center;gap:4px;padding:4px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);border-radius:999px}
+.nav-links a{font-size:14px;color:#9ca3af;padding:9px 16px;border-radius:999px;transition:.2s ease;font-weight:500;text-decoration:none}
+.nav-links a:hover,.nav-links a.active{background:rgba(123,97,255,.15);color:#fff}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.btn{border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;font-weight:700;font-size:14px;letter-spacing:-.01em;transition:transform .2s,box-shadow .2s,background .2s;user-select:none;white-space:nowrap;text-decoration:none}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,#7b61ff,#9f7eff);box-shadow:0 12px 36px rgba(123,97,255,.3);color:#fff}
+.btn-primary:hover{box-shadow:0 16px 48px rgba(123,97,255,.4)}
+.btn-secondary{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff}
+.btn-secondary:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08)}
+.btn-sm{min-height:36px;padding:0 14px;font-size:13px}
+.btn-lg{min-height:52px;padding:0 28px;font-size:15px}
+.btn-danger{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#fecaca}
+.mobile-toggle{display:none;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:12px;width:40px;height:40px;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.mobile-toggle span,.mobile-toggle::before,.mobile-toggle::after{content:"";display:block;width:18px;height:2px;background:#fff;border-radius:2px;transition:.25s}
+
+.card{border:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border-radius:20px;box-shadow:0 16px 40px rgba(0,0,0,.3);position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 0%,rgba(123,97,255,.08),transparent 30rem);pointer-events:none}
+.card>*{position:relative;z-index:1}
+.card-pad{padding:32px}
+
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:#9f7eff;border:1px solid rgba(123,97,255,.2);background:rgba(123,97,255,.08);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:#9f7eff;box-shadow:0 0 10px #9f7eff}
+h1{font-size:clamp(40px,6vw,72px);line-height:1.0;letter-spacing:-.04em;font-weight:800;color:#fff;margin-bottom:20px}
+h2{font-size:clamp(24px,3vw,32px);font-weight:700;color:#fff;margin-bottom:12px}
+h3{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.gradient-text{background:linear-gradient(92deg,#fff 0%,#d9c8ff 38%,#7b61ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:18px;max-width:560px;color:#9ca3af;line-height:1.7}
+
+.input-wrap{display:grid;gap:8px}
+.input-wrap label{font-size:13px;color:#e2e2ea;font-weight:600}
+.input,.select{width:100%;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:14px;min-height:52px;padding:0 16px;outline:none;transition:.2s;font-size:15px;color:#fff;font-family:inherit}
+.input:focus,.select:focus{border-color:rgba(123,97,255,.6);box-shadow:0 0 0 3px rgba(123,97,255,.1)}
+.input::placeholder{color:#6b7280}
+.select option{background:#0a0a0f;color:#fff}
+textarea.input{padding:14px;min-height:120px;resize:vertical}
+
+.table-wrap{overflow:auto;border:1px solid rgba(255,255,255,.06);border-radius:20px;background:rgba(255,255,255,.02)}
+table{border-collapse:collapse;width:100%;min-width:700px}
+th,td{text-align:left;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05)}
+th{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.02);font-weight:600}
+td{font-size:14px;color:#e2e2ea}
+tr:hover td{background:rgba(123,97,255,.04)}
+
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.badge-clean{background:rgba(16,185,129,.12);color:#a7f3d0;border:1px solid rgba(16,185,129,.3)}
+.badge-suspicious{background:rgba(245,158,11,.12);color:#fde68a;border:1px solid rgba(245,158,11,.3)}
+.badge-threat{background:rgba(239,68,68,.12);color:#fecaca;border:1px solid rgba(239,68,68,.3)}
+.badge-info{background:rgba(59,130,246,.12);color:#bfdbfe;border:1px solid rgba(59,130,246,.3)}
+.badge-owner{background:rgba(123,97,255,.15);color:#dacbff;border:1px solid rgba(123,97,255,.3)}
+
+.app-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 72px)}
+.sidebar{border-right:1px solid rgba(255,255,255,.06);background:rgba(8,8,12,.7);padding:24px 16px;position:sticky;top:72px;height:calc(100vh - 72px);overflow-y:auto}
+.sidebar-profile{padding:20px;border:1px solid rgba(255,255,255,.06);border-radius:18px;background:rgba(255,255,255,.03);margin-bottom:20px}
+.avatar{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#fff,#7b61ff);display:grid;place-items:center;color:#07030e;font-weight:900;font-size:18px;margin-bottom:12px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.sidebar-profile h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+.sidebar-profile p{font-size:13px;color:#6b7280;font-family:'JetBrains Mono',monospace}
+.side-nav{display:grid;gap:4px}
+.side-link{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;color:#9ca3af;transition:.2s;font-size:14px;font-weight:500;text-decoration:none;border:0;background:transparent;cursor:pointer;width:100%;text-align:left}
+.side-link:hover,.side-link.active{background:rgba(123,97,255,.12);color:#fff}
+
+.app-main{padding:32px;min-width:0}
+.app-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:32px;flex-wrap:wrap}
+.app-title h1{font-size:32px;font-weight:800;color:#fff;margin:0 0 6px}
+.app-title p{font-size:15px;color:#9ca3af;margin:0}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.metric{padding:24px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);border-radius:20px;transition:.3s}
+.metric:hover{border-color:rgba(123,97,255,.15);background:rgba(123,97,255,.03)}
+.metric span{color:#6b7280;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px}
+.metric strong{display:block;font-size:36px;color:#fff;font-weight:800;letter-spacing:-.03em}
+
+.terminal{padding:20px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:#06060a;font-family:'JetBrains Mono',monospace;font-size:13px;color:#b4a8d4}
+.terminal .line{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);padding:10px 0}
+.terminal .line:last-child{border-bottom:0}
+.terminal .line span:first-child{color:#6b7280}
+.terminal .line span:last-child{color:#fff;font-weight:600}
+
+.status-bars{display:grid;gap:16px}
+.status-bar{display:grid;grid-template-columns:140px 1fr 48px;gap:16px;align-items:center;padding:16px;border:1px solid rgba(255,255,255,.06);border-radius:16px;background:rgba(255,255,255,.02);transition:.3s}
+.status-bar:hover{border-color:rgba(123,97,255,.1)}
+.status-bar strong{display:block;font-size:15px;color:#fff;font-weight:700}
+.status-bar span{display:block;color:#6b7280;font-size:12px;margin-top:2px}
+.status-bar .bar{height:10px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);border-radius:999px;overflow:hidden}
+.status-bar .bar i{display:block;height:100%;border-radius:999px}
+.bar-clean{background:linear-gradient(90deg,rgba(16,185,129,.7),rgba(255,255,255,.5))}
+.bar-suspicious{background:linear-gradient(90deg,rgba(245,158,11,.7),rgba(255,255,255,.5))}
+.bar-threat{background:linear-gradient(90deg,rgba(239,68,68,.7),rgba(255,255,255,.5))}
+.status-bar b{text-align:right;font-size:14px;color:#fff;font-weight:700}
+
+.mini-list{display:grid;gap:10px}
+.mini-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border:1px solid rgba(255,255,255,.06);border-radius:14px;background:rgba(255,255,255,.02);transition:.3s}
+.mini-row:hover{border-color:rgba(123,97,255,.1);background:rgba(123,97,255,.02)}
+.mini-row span{font-size:14px;color:#e2e2ea}
+.mini-row strong{font-size:16px;color:#fff;font-weight:700}
+
+.timeline-list{display:grid;gap:10px}
+.timeline-item{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid rgba(255,255,255,.06);border-radius:14px;background:rgba(255,255,255,.02);transition:.3s}
+.timeline-item:hover{border-color:rgba(123,97,255,.1)}
+.timeline-item .time{font-family:'JetBrains Mono',monospace;font-size:13px;color:#d8ccff;min-width:44px;flex-shrink:0}
+.timeline-item div{flex:1}
+.timeline-item strong{font-size:14px;color:#fff;display:block;margin-bottom:2px}
+.timeline-item p{font-size:13px;color:#6b7280;margin:0}
+
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.quick-action{display:block;padding:24px;border:1px solid rgba(255,255,255,.06);border-radius:18px;background:rgba(255,255,255,.02);transition:.3s;text-decoration:none;color:inherit}
+.quick-action:hover{border-color:rgba(123,97,255,.25);background:rgba(123,97,255,.04);transform:translateY(-2px)}
+.quick-action strong{display:block;margin-bottom:8px;font-size:17px;color:#fff;font-weight:700}
+.quick-action span{display:block;color:#9ca3af;font-size:14px;line-height:1.6}
+
+.preview-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px}
+
+.footer{border-top:1px solid rgba(255,255,255,.06);background:rgba(6,6,10,.8);padding:40px 24px 24px;text-align:center}
+.footer p{color:#6b7280;font-size:13px}
+
+.lock-overlay{position:fixed;inset:0;background:rgba(10,10,15,.95);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(10px)}
+.lock-overlay.show{display:flex}
+.lock-card{text-align:center;max-width:420px;padding:40px}
+.lock-icon{width:80px;height:80px;border-radius:50%;background:rgba(123,97,255,.1);border:2px solid rgba(123,97,255,.3);display:grid;place-items:center;margin:0 auto 24px;font-size:32px;color:#9f7eff}
+.lock-card h2{font-size:28px;font-weight:800;color:#fff;margin-bottom:12px}
+.lock-card p{color:#9ca3af;font-size:15px;margin-bottom:24px;line-height:1.6}
+
+.toast{position:fixed;right:20px;bottom:20px;z-index:999;padding:14px 18px;border:1px solid rgba(123,97,255,.3);border-radius:16px;background:rgba(12,8,22,.95);box-shadow:0 16px 40px rgba(0,0,0,.4);transform:translateY(16px);opacity:0;pointer-events:none;transition:.2s;font-size:14px;color:#e2e2ea}
+.toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:1050px){
+.app-layout{grid-template-columns:1fr}
+.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid rgba(255,255,255,.06)}
+.side-nav{display:flex;overflow:auto;gap:6px;padding-bottom:6px}
+.side-link{white-space:nowrap;width:auto}
+.metric-grid{grid-template-columns:repeat(2,1fr)}
+.preview-grid{grid-template-columns:1fr}
+.quick-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:820px){
+.mobile-toggle{display:flex}
+.nav-links{position:fixed;left:16px;right:16px;top:80px;display:none;flex-direction:column;border-radius:20px;background:rgba(10,10,15,.98);padding:12px;border:1px solid rgba(255,255,255,.08);z-index:99}
+.mobile-open .nav-links{display:flex}
+.nav-links a{width:100%;text-align:center}
+.nav-actions .btn-secondary{display:none}
+.app-topbar{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:640px){
+.metric-grid{grid-template-columns:1fr}
+.quick-grid{grid-template-columns:1fr}
+.status-bar{grid-template-columns:1fr}
+.status-bar b{text-align:left}
+.btn{width:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav">
+    <a class="brand" href="index.html"><img src="mark.svg" alt="3X"><span>3X Cloud<small>Game forensics</small></span></a>
+    <nav class="nav-links" data-nav><a href="index.html">Home</a><a href="pricing.html">Pricing</a><a href="download.html">Download</a><a href="dashboard.html">Dashboard</a><a href="scans.html">Scans</a><a href="admin.html">Admin</a><a href="docs.html" class=active>Guide</a></nav>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="login.html">Login</a>
+      <button class="mobile-toggle" data-mobile-toggle aria-label="Open menu"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="lock-overlay" id="lockOverlay">
+  <div class="lock-card">
+    <div class="lock-icon">🔒</div>
+    <h2>Authentication Required</h2>
+    <p>Please login with Discord to access this area. Your session will sync with your Discord profile.</p>
+    <a class="btn btn-primary btn-lg" href="login.html" style="margin-top:8px">Login with Discord</a>
+  </div>
+</div>
+
+<main class="app-layout" id="appLayout" style="display:none">
+
+<aside class="sidebar">
+  <div class="sidebar-profile">
+    <div class="avatar" id="userAvatar">3X</div>
+    <h3 id="userName">Guest</h3>
+    <p id="userId">Not logged in</p>
+  </div>
+  <nav class="side-nav"><a class="side-link" href="dashboard.html">◇ Dashboard</a><a class="side-link" href="admin.html">✦ Admin / PINs</a><a class="side-link" href="scans.html">◎ Scans</a><a class="side-link" href="download.html">⇣ Download</a><a class="side-link active" href="docs.html">☰ Guide</a><button class="side-link" onclick="logout()">⏻ Logout</button></nav>
+</aside>
+
+<section class="app-main">
+  <div class="app-topbar">
+    <div class="app-title">
+      <h1>Documentation</h1>
+      <p>Everything you need to deploy, configure, and use 3X Cloud.</p>
+    </div>
+  </div>
+
+  <div class="card card-pad" style="margin-bottom:20px">
+    <h2>Getting Started</h2>
+    <ol style="color:#9ca3af;line-height:2;margin-top:16px;padding-left:20px">
+      <li>Create an account via Discord OAuth2.</li>
+      <li>Login with Discord and verify your Customer role.</li>
+      <li>Activate your license through the admin panel.</li>
+      <li>Download the client using your generated PIN.</li>
+      <li>Run a scan and review results in the dashboard.</li>
+    </ol>
+  </div>
+
+  <div class="card card-pad" style="margin-bottom:20px">
+    <h2>Dashboard</h2>
+    <p style="color:#9ca3af;margin-bottom:16px">Manage scans, licenses, reports and account settings.</p>
+    <div class="terminal">
+      <div class="line"><span>Scans</span><span>View all forensic reports</span></div>
+      <div class="line"><span>PINs</span><span>Generate access codes</span></div>
+      <div class="line"><span>Users</span><span>Manage staff & analysts</span></div>
+      <div class="line"><span>Settings</span><span>Configure integrations</span></div>
+    </div>
+  </div>
+
+  <div class="card card-pad" style="margin-bottom:20px">
+    <h2>Support</h2>
+    <p style="color:#9ca3af;margin-bottom:16px">Contact the 3X support team through official community channels. Discord tickets are the fastest way.</p>
+    <a class="btn btn-primary" href="https://discord.gg/QjzyvHVj79" target="_blank">Join Discord</a>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <p>© 2026 3X Cloud. All rights reserved.</p>
+</footer>
+
+<script>
+(function(){
+  const OWNER_ID = "827236167686291477";
+  const OAUTH_URL = "https://discord.com/oauth2/authorize?client_id=1518460165068689498&response_type=code&redirect_uri=https%3A%2F%2F3x-cloudxbeta.hmktt22.workers.dev%2Flogin.html&scope=identify+connections+guilds.members.read+identify.premium+guilds+guilds.channels.read+email+guilds.join+gdm.join";
+
+  function getUser(){return JSON.parse(localStorage.getItem('threex_user')||'null');}
+  function isLoggedIn(){const u=getUser();return u&&u.id&&u.accessToken;}
+  function isOwner(){const u=getUser();return u&&String(u.id)===OWNER_ID;}
+
+  window.THREEX = {OAUTH_URL,OWNER_ID,getUser,isLoggedIn,isOwner};
+
+  window.requireAuth = function(){
+    if(!isLoggedIn()){
+      const overlay=document.getElementById('lockOverlay');
+      if(overlay)overlay.classList.add('show');
+      else location.href='login.html';
+      return false;
+    }
+    return true;
+  };
+
+  window.requireOwner = function(){
+    if(!requireAuth())return false;
+    if(!isOwner()){
+      alert('Access denied. Owner only.');
+      location.href='dashboard.html';
+      return false;
+    }
+    return true;
+  };
+
+  window.logout = function(){
+    localStorage.removeItem('threex_user');
+    localStorage.removeItem('threex_staff');
+    location.href='login.html';
+  };
+
+  window.updateUserUI = function(){
+    const u=getUser();
+    const nameEl=document.getElementById('userName');
+    const idEl=document.getElementById('userId');
+    const avatarEl=document.getElementById('userAvatar');
+    if(u&&nameEl){
+      nameEl.textContent=u.name||u.username||'User';
+      idEl.textContent=u.discordId||u.id||'Logged in';
+      if(u.avatar&&u.avatar!=='3X'){
+        avatarEl.innerHTML=`<img src="https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png" alt="" onerror="this.style.display='none'">`;
+      }else{
+        avatarEl.textContent=(u.name||u.username||'U').charAt(0).toUpperCase();
+      }
+    }
+  };
+
+  window.toast = function(msg){
+    let t=document.querySelector('.toast');
+    if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}
+    t.textContent=msg;t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+  };
+})();
+</script>
+<script>
+const menuBtn=document.querySelector('[data-mobile-toggle]');
+if(menuBtn)menuBtn.addEventListener('click',()=>document.body.classList.toggle('mobile-open'));
+const cur=location.pathname.split('/').pop()||'index.html';
+document.querySelectorAll('[data-nav] a').forEach(a=>{
+  const h=a.getAttribute('href')||'';const f=h.split('/').pop()||'index.html';
+  if(f===cur||(cur===''&&f==='index.html'))a.classList.add('active');
+});
+</script>
+
+<script>
+(function(){
+  if(!requireAuth())return;
+  document.getElementById('appLayout').style.display='grid';
+  document.getElementById('lockOverlay').style.display='none';
+  updateUserUI();
+})();
+</script>
+</body>
+</html>

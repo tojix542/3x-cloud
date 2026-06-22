@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Secrets & env files
+.env
+.env.local
+*.secret
+*.key
+
+# Wrangler output (if using local dev)
+.wrangler/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db

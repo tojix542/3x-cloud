@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3X Cloud — Authentication Gateway</title>
+<link rel="icon" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#030307;
+  color:#c8ccd8;
+  line-height:1.6;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+::selection{background:rgba(0,204,153,.25);color:#fff}
+
+/* Ambient background */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 0%,rgba(0,204,153,.07),transparent),
+    radial-gradient(ellipse 50% 35% at 80% 60%,rgba(0,150,255,.04),transparent),
+    radial-gradient(ellipse 40% 30% at 10% 80%,rgba(0,204,153,.03),transparent);
+}
+
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  --accent:#00cc99;
+  --accent-dim:rgba(0,204,153,.12);
+  --accent-border:rgba(0,204,153,.25);
+  --accent-glow:rgba(0,204,153,.3);
+  --surface:#07080f;
+  --surface2:#0b0d18;
+  --border:rgba(255,255,255,.06);
+  --border2:rgba(255,255,255,.1);
+  --text:#c8ccd8;
+  --muted:#5a6278;
+  --white:#ffffff;
+  --clean:#00d68f;
+  --suspicious:#f5a623;
+  --threat:#ff4d4d;
+  --mono:'JetBrains Mono',monospace;
+  --radius-sm:10px;
+  --radius:16px;
+  --radius-lg:20px;
+}
+
+/* ============================================================
+   LOADING OVERLAY
+   ============================================================ */
+.loading-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(3,3,7,.96);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:20px;
+  z-index:1000;
+  backdrop-filter:blur(12px);
+}
+.loading-overlay.show{display:flex}
+.spinner{
+  width:44px;
+  height:44px;
+  border:2px solid rgba(0,204,153,.15);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 0.9s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay p{
+  color:var(--muted);
+  font-size:13px;
+  font-family:var(--mono);
+  letter-spacing:.05em;
+}
+
+/* ============================================================
+   LOGIN VIEW
+   ============================================================ */
+.login-view{
+  position:relative;
+  z-index:1;
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  transition:opacity .5s ease, filter .5s ease;
+}
+.login-view.hidden{
+  opacity:0;
+  pointer-events:none;
+  filter:blur(8px);
+  position:absolute;
+}
+
+/* Left panel — branding + steps */
+.login-left{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:48px 56px;
+  border-right:1px solid var(--border);
+  background:var(--surface);
+  position:relative;
+  overflow:hidden;
+}
+.login-left::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse 80% 60% at 0% 100%,rgba(0,204,153,.05),transparent);
+  pointer-events:none;
+}
+
+/* Grid lines decoration */
+.login-left::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+}
+
+.left-brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  position:relative;
+  z-index:1;
+}
+.left-brand-icon{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  background:var(--accent-dim);
+  border:1px solid var(--accent-border);
+  display:grid;
+  place-items:center;
+  font-family:var(--mono);
+  font-size:14px;
+  font-weight:700;
+  color:var(--accent);
+  letter-spacing:-.02em;
+}
+.left-brand-name{
+  font-size:17px;
+  font-weight:800;
+  color:var(--white);
+  letter-spacing:-.03em;
+}
+.left-brand-name small{
+  display:block;
+  font-size:10px;
+  font-weight:600;
+  color:var(--muted);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  margin-top:-1px;
+}
+
+.left-hero{
+  position:relative;
+  z-index:1;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:48px 0;
+}
+
+.left-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:var(--accent);
+  border:1px solid var(--accent-border);
+  background:var(--accent-dim);
+  border-radius:999px;
+  padding:5px 13px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:20px;
+  width:fit-content;
+}
+.left-tag::before{
+  content:"";
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 10px var(--accent);
+  animation:pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot{
+  0%,100%{opacity:1}
+  50%{opacity:.4}
+}
+
+.left-hero h1{
+  font-size:clamp(30px,3.5vw,44px);
+  font-weight:800;
+  color:var(--white);
+  letter-spacing:-.04em;
+  line-height:1.1;
+  margin-bottom:16px;
+}
+.left-hero h1 em{
+  font-style:normal;
+  color:var(--accent);
+}
+.left-hero p{
+  font-size:15px;
+  color:var(--muted);
+  max-width:340px;
+  line-height:1.7;
+  margin-bottom:40px;
+}
+
+/* How it works steps */
+.steps{
+  display:grid;
+  gap:0;
+  position:relative;
+}
+.steps::before{
+  content:"";
+  position:absolute;
+  left:19px;
+  top:28px;
+  bottom:28px;
+  width:1px;
+  background:linear-gradient(to bottom, var(--accent-border), transparent);
+}
+.step{
+  display:flex;
+  gap:16px;
+  align-items:flex-start;
+  padding:14px 0;
+  position:relative;
+}
+.step-num{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:1px solid var(--accent-border);
+  background:var(--accent-dim);
+  display:grid;
+  place-items:center;
+  font-family:var(--mono);
+  font-size:12px;
+  font-weight:700;
+  color:var(--accent);
+  flex-shrink:0;
+  position:relative;
+  z-index:1;
+}
+.step-body strong{
+  display:block;
+  font-size:14px;
+  font-weight:700;
+  color:var(--white);
+  margin-bottom:2px;
+}
+.step-body p{
+  font-size:13px;
+  color:var(--muted);
+  margin:0;
+  line-height:1.5;
+}
+
+/* Scan preview widget */
+.scan-preview{
+  position:relative;
+  z-index:1;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.scan-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 12px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--surface2);
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--muted);
+}
+.scan-chip b{font-weight:600;color:var(--white)}
+.scan-chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-clean{background:var(--clean);box-shadow:0 0 8px rgba(0,214,143,.5)}
+.dot-sus{background:var(--suspicious);box-shadow:0 0 8px rgba(245,166,35,.4)}
+.dot-threat{background:var(--threat);box-shadow:0 0 8px rgba(255,77,77,.4)}
+
+/* Right panel — auth card */
+.login-right{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:48px 40px;
+  position:relative;
+  z-index:1;
+}
+
+.auth-card{
+  width:min(420px,100%);
+}
+
+.auth-card-header{
+  margin-bottom:32px;
+}
+.auth-card-header h2{
+  font-size:26px;
+  font-weight:800;
+  color:var(--white);
+  letter-spacing:-.03em;
+  margin-bottom:6px;
+}
+.auth-card-header p{
+  font-size:14px;
+  color:var(--muted);
+  line-height:1.6;
+}
+.auth-card-header p strong{
+  color:var(--text);
+  font-weight:600;
+}
+
+/* Gate message */
+.gate-msg{
+  display:none;
+  padding:16px 18px;
+  border:1px solid rgba(245,166,35,.3);
+  border-radius:var(--radius);
+  background:rgba(245,166,35,.07);
+  margin-bottom:20px;
+  animation:slide-up .35s ease;
+}
+.gate-msg.show{display:block}
+.gate-msg h3{
+  font-size:14px;
+  color:#fde68a;
+  margin-bottom:7px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+}
+.gate-msg p{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:4px;
+  line-height:1.5;
+}
+.gate-msg a{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:600;
+  font-size:13px;
+}
+.gate-msg a:hover{text-decoration:underline}
+
+/* Discord button */
+.discord-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  min-height:52px;
+  padding:0 24px;
+  border-radius:var(--radius);
+  border:1px solid rgba(88,101,242,.4);
+  background:linear-gradient(135deg,rgba(88,101,242,.2),rgba(88,101,242,.1));
+  color:var(--white);
+  font-family:inherit;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:none;
+  transition:all .22s ease;
+  margin-bottom:24px;
+  position:relative;
+  overflow:hidden;
+}
+.discord-btn::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(88,101,242,.35),rgba(88,101,242,.2));
+  opacity:0;
+  transition:opacity .22s;
+}
+.discord-btn:hover::after{opacity:1}
+.discord-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 40px rgba(88,101,242,.25);
+  border-color:rgba(88,101,242,.7);
+}
+.discord-btn svg{
+  width:20px;height:20px;flex-shrink:0;position:relative;z-index:1
+}
+.discord-btn span{position:relative;z-index:1}
+
+/* Auth status rows */
+.auth-rows{
+  display:grid;
+  gap:8px;
+  margin-bottom:24px;
+}
+.auth-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  background:rgba(255,255,255,.02);
+  font-size:13px;
+  transition:.2s;
+}
+.auth-row:hover{border-color:var(--accent-border);background:var(--accent-dim)}
+.auth-row .label{color:var(--muted);font-weight:500;font-family:var(--mono)}
+.auth-row strong{color:var(--text);font-weight:600;font-size:12px;text-align:right}
+
+/* Footer */
+.auth-footer{
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.7;
+}
+.auth-footer a{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:600;
+}
+.auth-footer a:hover{text-decoration:underline}
+
+.auth-brand-tag{
+  display:block;
+  margin-top:16px;
+  font-family:var(--mono);
+  font-size:10px;
+  color:rgba(255,255,255,.12);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+
+/* ============================================================
+   DASHBOARD VIEW
+   ============================================================ */
+.dashboard-view{
+  display:none;
+  min-height:100vh;
+  opacity:0;
+  transform:translateY(16px);
+  transition:opacity .7s ease .1s, transform .7s ease .1s;
+  position:relative;
+  z-index:1;
+}
+.dashboard-view.unlocked{
+  display:block;
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* Header */
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  height:64px;
+  border-bottom:1px solid var(--border);
+  background:rgba(3,3,7,.88);
+  backdrop-filter:blur(20px);
+}
+.nav{
+  height:100%;
+  max-width:1280px;
+  margin:0 auto;
+  padding:0 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+}
+.brand-icon{
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  background:var(--accent-dim);
+  border:1px solid var(--accent-border);
+  display:grid;
+  place-items:center;
+  font-family:var(--mono);
+  font-size:12px;
+  font-weight:700;
+  color:var(--accent);
+  flex-shrink:0;
+}
+.brand-label{
+  font-size:15px;
+  font-weight:800;
+  color:var(--white);
+  letter-spacing:-.03em;
+}
+.brand-label small{
+  display:block;
+  font-size:9px;
+  font-weight:600;
+  color:var(--muted);
+  letter-spacing:.15em;
+  text-transform:uppercase;
+}
+
+.nav-pills{
+  display:flex;
+  align-items:center;
+  gap:2px;
+  padding:3px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.02);
+  border-radius:999px;
+}
+.nav-pills a{
+  font-size:13px;
+  color:var(--muted);
+  padding:7px 14px;
+  border-radius:999px;
+  transition:.18s ease;
+  font-weight:500;
+  text-decoration:none;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.nav-pills a:hover,.nav-pills a.active{
+  background:rgba(0,204,153,.12);
+  color:var(--accent);
+}
+
+.nav-end{display:flex;align-items:center;gap:10px}
+
+/* Buttons */
+.btn{
+  border:0;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:40px;
+  padding:0 18px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:-.01em;
+  transition:transform .18s, box-shadow .18s, background .18s;
+  user-select:none;
+  white-space:nowrap;
+  text-decoration:none;
+  color:inherit;
+  font-family:inherit;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{
+  background:var(--accent);
+  color:#00221a;
+  box-shadow:0 8px 28px rgba(0,204,153,.25);
+}
+.btn-primary:hover{box-shadow:0 12px 36px rgba(0,204,153,.35)}
+.btn-secondary{
+  border:1px solid var(--border2);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+}
+.btn-secondary:hover{border-color:var(--border2);background:rgba(255,255,255,.08)}
+.btn-sm{min-height:34px;padding:0 12px;font-size:12px}
+.btn-danger{background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.25);color:#fca5a5}
+
+/* App layout */
+.app-layout{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  min-height:calc(100vh - 64px);
+}
+.sidebar{
+  border-right:1px solid var(--border);
+  background:var(--surface);
+  padding:20px 14px;
+  position:sticky;
+  top:64px;
+  height:calc(100vh - 64px);
+  overflow-y:auto;
+}
+.sidebar-profile{
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:rgba(255,255,255,.02);
+  margin-bottom:16px;
+}
+.avatar{
+  width:42px;
+  height:42px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),#005f47);
+  display:grid;
+  place-items:center;
+  color:#00221a;
+  font-weight:900;
+  font-size:16px;
+  margin-bottom:10px;
+  overflow:hidden;
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.sidebar-profile h3{
+  font-size:14px;
+  font-weight:700;
+  color:var(--white);
+  margin-bottom:3px;
+}
+.sidebar-profile p{
+  font-size:11px;
+  color:var(--muted);
+  font-family:var(--mono);
+}
+
+.side-nav{display:grid;gap:2px}
+.side-link{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:9px 12px;
+  border-radius:var(--radius-sm);
+  color:var(--muted);
+  transition:.18s;
+  font-size:13px;
+  font-weight:500;
+  text-decoration:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  width:100%;
+  text-align:left;
+  font-family:inherit;
+}
+.side-link:hover,.side-link.active{
+  background:rgba(0,204,153,.08);
+  color:var(--accent);
+}
+
+.app-main{
+  padding:28px 32px;
+  min-width:0;
+}
+.app-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:28px;
+  flex-wrap:wrap;
+}
+.app-title h1{
+  font-size:26px;
+  font-weight:800;
+  color:var(--white);
+  margin:0 0 4px;
+  letter-spacing:-.03em;
+}
+.app-title p{
+  font-size:13px;
+  color:var(--muted);
+  margin:0;
+}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Metric grid */
+.metric-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:24px;
+}
+.metric{
+  padding:20px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.02);
+  border-radius:var(--radius);
+  transition:.25s;
+}
+.metric:hover{border-color:var(--accent-border);background:var(--accent-dim)}
+.metric .m-label{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  display:block;
+  margin-bottom:8px;
+  font-family:var(--mono);
+}
+.metric strong{
+  display:block;
+  font-size:34px;
+  color:var(--white);
+  font-weight:800;
+  letter-spacing:-.03em;
+}
+
+/* Cards */
+.card{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.02);
+  border-radius:var(--radius-lg);
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-border),transparent);
+}
+.card-pad{padding:24px}
+
+/* Terminal / data rows */
+.terminal{
+  padding:18px;
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  background:#020204;
+  font-family:var(--mono);
+  font-size:12px;
+  color:#8892a8;
+}
+.terminal .line{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  padding:8px 0;
+}
+.terminal .line:last-child{border-bottom:0}
+.terminal .line span:first-child{color:var(--muted)}
+.terminal .line span:last-child{color:var(--white);font-weight:600}
+
+/* Status bars */
+.status-bars{display:grid;gap:12px;margin-top:12px}
+.status-bar{
+  display:grid;
+  grid-template-columns:120px 1fr 44px;
+  gap:14px;
+  align-items:center;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:rgba(255,255,255,.015);
+  transition:.25s;
+}
+.status-bar:hover{border-color:var(--accent-border)}
+.status-bar strong{display:block;font-size:13px;color:var(--white);font-weight:700}
+.status-bar span{display:block;color:var(--muted);font-size:11px;margin-top:1px;font-family:var(--mono)}
+.status-bar .bar{height:8px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.03);border-radius:999px;overflow:hidden}
+.status-bar .bar i{display:block;height:100%;border-radius:999px}
+.bar-clean{background:linear-gradient(90deg,var(--clean),rgba(0,214,143,.4))}
+.bar-suspicious{background:linear-gradient(90deg,var(--suspicious),rgba(245,166,35,.4))}
+.bar-threat{background:linear-gradient(90deg,var(--threat),rgba(255,77,77,.4))}
+.status-bar b{text-align:right;font-size:13px;color:var(--white);font-weight:700;font-family:var(--mono)}
+
+/* Timeline */
+.timeline-list{display:grid;gap:8px;margin-top:12px}
+.timeline-item{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding:11px 13px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:rgba(255,255,255,.015);
+  transition:.25s;
+}
+.timeline-item:hover{border-color:var(--accent-border)}
+.timeline-item .time{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--accent);
+  min-width:40px;
+  flex-shrink:0;
+}
+.timeline-item div{flex:1}
+.timeline-item strong{font-size:13px;color:var(--white);display:block;margin-bottom:1px}
+.timeline-item p{font-size:12px;color:var(--muted);margin:0}
+
+/* Quick actions */
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
+.quick-action{
+  display:block;
+  padding:20px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:rgba(255,255,255,.015);
+  transition:.25s;
+  text-decoration:none;
+  color:inherit;
+  cursor:pointer;
+}
+.quick-action:hover{
+  border-color:var(--accent-border);
+  background:var(--accent-dim);
+  transform:translateY(-2px);
+}
+.quick-action strong{display:block;margin-bottom:6px;font-size:14px;color:var(--white);font-weight:700}
+.quick-action span{display:block;color:var(--muted);font-size:12px;line-height:1.5}
+
+/* Preview grid */
+.preview-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+
+/* Badges */
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  border-radius:6px;
+  padding:4px 10px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  font-family:var(--mono);
+}
+.badge::before{content:"";width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge-clean{background:rgba(0,214,143,.1);color:#a7f3d0;border:1px solid rgba(0,214,143,.25)}
+.badge-clean::before{background:var(--clean)}
+.badge-suspicious{background:rgba(245,166,35,.1);color:#fde68a;border:1px solid rgba(245,166,35,.25)}
+.badge-suspicious::before{background:var(--suspicious)}
+.badge-threat{background:rgba(255,77,77,.1);color:#fca5a5;border:1px solid rgba(255,77,77,.25)}
+.badge-threat::before{background:var(--threat)}
+.badge-info{background:rgba(59,130,246,.1);color:#bfdbfe;border:1px solid rgba(59,130,246,.25)}
+.badge-info::before{background:#3b82f6}
+
+/* Table */
+.table-wrap{overflow:auto;border-radius:var(--radius-lg);border:1px solid var(--border);background:rgba(255,255,255,.01)}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--border)}
+th{
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  background:rgba(255,255,255,.02);
+  font-weight:700;
+  font-family:var(--mono);
+}
+td{font-size:13px;color:var(--text)}
+tr:hover td{background:rgba(0,204,153,.03)}
+tr:last-child td{border-bottom:0}
+
+/* Eyebrow */
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:var(--accent);
+  border:1px solid var(--accent-border);
+  background:var(--accent-dim);
+  border-radius:999px;
+  padding:5px 12px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.eyebrow::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+
+/* Input / select */
+.input,.select{
+  width:100%;
+  border:1px solid var(--border2);
+  background:rgba(255,255,255,.04);
+  border-radius:var(--radius);
+  min-height:48px;
+  padding:0 14px;
+  outline:none;
+  transition:.2s;
+  font-size:14px;
+  color:var(--white);
+  font-family:inherit;
+}
+.input:focus,.select:focus{border-color:rgba(0,204,153,.5);box-shadow:0 0 0 3px rgba(0,204,153,.08)}
+.input::placeholder{color:var(--muted)}
+.select option{background:#0b0d18;color:var(--white)}
+
+/* Toast */
+.toast{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:999;
+  padding:12px 16px;
+  border:1px solid var(--accent-border);
+  border-radius:var(--radius);
+  background:rgba(3,3,7,.95);
+  box-shadow:0 12px 32px rgba(0,0,0,.5),0 0 0 1px rgba(0,204,153,.1);
+  transform:translateY(14px);
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  font-size:13px;
+  color:var(--text);
+  font-family:var(--mono);
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* Footer */
+.footer{
+  border-top:1px solid var(--border);
+  background:var(--surface);
+  padding:28px 24px;
+  text-align:center;
+}
+.footer p{color:var(--muted);font-size:12px;font-family:var(--mono);letter-spacing:.03em}
+
+/* Misc */
+.gradient-text{
+  background:linear-gradient(92deg,#fff 0%,#a0f2e0 40%,var(--accent) 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+/* Animations */
+@keyframes slide-up{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:860px){
+  .login-view{grid-template-columns:1fr}
+  .login-left{display:none}
+  .login-right{padding:40px 24px}
+}
+@media(max-width:1050px){
+  .app-layout{grid-template-columns:1fr}
+  .sidebar{
+    position:static;
+    height:auto;
+    border-right:0;
+    border-bottom:1px solid var(--border);
+  }
+  .side-nav{display:flex;overflow:auto;gap:4px;padding-bottom:4px}
+  .side-link{white-space:nowrap;width:auto}
+  .metric-grid{grid-template-columns:repeat(2,1fr)}
+  .preview-grid{grid-template-columns:1fr}
+  .quick-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  .nav-pills{display:none}
+  .app-topbar{flex-direction:column;align-items:flex-start}
+  .metric-grid{grid-template-columns:1fr 1fr}
+  .quick-grid{grid-template-columns:1fr}
+  .status-bar{grid-template-columns:1fr}
+  .status-bar b{text-align:left}
+}
+@media(max-width:480px){
+  .app-main{padding:18px}
+  .metric-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p>// verifying identity...</p>
+</div>
+
+<!-- ============================================================
+     LOGIN VIEW
+     ============================================================ -->
+<div class="login-view" id="loginView">
+
+  <!-- Left panel -->
+  <div class="login-left">
+    <div class="left-brand">
+      <div class="left-brand-icon">3X</div>
+      <div class="left-brand-name">
+        3X Cloud
+        <small>Game Forensics</small>
+      </div>
+    </div>
+
+    <div class="left-hero">
+      <span class="left-tag">Deep-scan forensics</span>
+      <h1>Detect threats.<br><em>Protect</em> your server.</h1>
+      <p>Multi-layer 6–8 minute deep-dive inspection. Professional-grade reports for community moderators — generated instantly.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-body">
+            <strong>Get the signed client</strong>
+            <p>Download securely with your session PIN after login.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-body">
+            <strong>Run as Administrator</strong>
+            <p>No install needed. Launch the scanner with elevated privileges.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-body">
+            <strong>Insert your session PIN</strong>
+            <p>Authenticate each session with a fresh PIN from your admin.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-body">
+            <strong>Review the web report</strong>
+            <p>Timestamped findings: clean, suspicious, or threat — right here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scan-preview">
+      <div class="scan-chip"><div class="dot dot-clean"></div><b>3X-8721</b> mohssine31 — Clean</div>
+      <div class="scan-chip"><div class="dot dot-sus"></div><b>3X-8718</b> Razor — Suspicious</div>
+      <div class="scan-chip"><div class="dot dot-threat"></div><b>3X-8709</b> Nox — Threat</div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="login-right">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h2>Authentication Gateway</h2>
+        <p>Login with Discord. You must hold the <strong>Customer</strong> role in our server to unlock the dashboard.</p>
+      </div>
+
+      <!-- Gate message -->
+      <div class="gate-msg" id="gateMsg">
+        <h3>⚠ Access Restricted</h3>
+        <p>You don't have the Customer role yet. Join our Discord and open a support ticket to purchase access.</p>
+        <p style="margin-top:6px"><a href="https://discord.gg/QjzyvHVj79" target="_blank">Join Discord Server →</a></p>
+      </div>
+
+      <!-- Discord button -->
+      <a class="discord-btn" id="discordBtn" href="#">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        <span id="btnText">Continue with Discord</span>
+      </a>
+
+      <!-- Auth status rows -->
+      <div class="auth-rows">
+        <div class="auth-row">
+          <span class="label">discord_id</span>
+          <strong id="rowDiscord">verified after login</strong>
+        </div>
+        <div class="auth-row">
+          <span class="label">server_check</span>
+          <strong id="rowServer">must be in our server</strong>
+        </div>
+        <div class="auth-row">
+          <span class="label">role_check</span>
+          <strong id="rowRole">customer role required</strong>
+        </div>
+        <div class="auth-row">
+          <span class="label">session_ttl</span>
+          <strong>48h</strong>
+        </div>
+      </div>
+
+      <div class="auth-footer">
+        Not in our Discord? <a href="https://discord.gg/QjzyvHVj79" target="_blank">Join here</a> first.
+        <br>
+        <a href="pricing.html">Pricing</a> · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a>
+        <span class="auth-brand-tag">3X CLOUD — GAME FORENSICS PLATFORM</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     DASHBOARD VIEW
+     ============================================================ -->
+<div class="dashboard-view" id="dashboardView">
+
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="#">
+        <div class="brand-icon">3X</div>
+        <div class="brand-label">
+          3X Cloud
+          <small>Game Forensics</small>
+        </div>
+      </a>
+      <nav class="nav-pills">
+        <a class="active" onclick="switchTab('dashboard')">Dashboard</a>
+        <a onclick="switchTab('scans')">Scans</a>
+        <a onclick="switchTab('download')">Download</a>
+        <a onclick="switchTab('admin')">Admin</a>
+        <a onclick="switchTab('docs')">Guide</a>
+      </nav>
+      <div class="nav-end">
+        <button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-profile">
+        <div class="avatar" id="dashAvatar">3X</div>
+        <h3 id="dashName">User</h3>
+        <p id="dashId">Logged in</p>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link active" onclick="switchTab('dashboard')">◇ Dashboard</a>
+        <a class="side-link" onclick="switchTab('scans')">◎ Scans</a>
+        <a class="side-link" onclick="switchTab('download')">⇣ Download</a>
+        <a class="side-link" onclick="switchTab('admin')">✦ Admin / PINs</a>
+        <a class="side-link" onclick="switchTab('docs')">☰ Guide</a>
+        <button class="side-link" onclick="logout()">⏻ Logout</button>
+      </nav>
+    </aside>
+
+    <section class="app-main" id="mainContent">
+
+      <!-- DASHBOARD TAB -->
+      <div id="tab-dashboard">
+        <div class="app-topbar">
+          <div class="app-title">
+            <h1>Dashboard</h1>
+            <p>Overview of your forensic scan activity.</p>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="toast('// new scan initiated')">New Scan</button>
+            <button class="btn btn-secondary" onclick="toast('// exporting data...')">Export</button>
+          </div>
+        </div>
+
+        <div class="metric-grid">
+          <div class="metric">
+            <span class="m-label">total_scans</span>
+            <strong id="metricTotal">3</strong>
+          </div>
+          <div class="metric">
+            <span class="m-label">clean</span>
+            <strong style="color:var(--clean)" id="metricClean">1</strong>
+          </div>
+          <div class="metric">
+            <span class="m-label">suspicious</span>
+            <strong style="color:var(--suspicious)" id="metricSuspicious">1</strong>
+          </div>
+          <div class="metric">
+            <span class="m-label">threats</span>
+            <strong style="color:var(--threat)" id="metricThreat">1</strong>
+          </div>
+        </div>
+
+        <div class="preview-grid">
+          <div class="card card-pad">
+            <h3 style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:12px">Scan Distribution</h3>
+            <div class="status-bars">
+              <div class="status-bar">
+                <div><strong>Clean</strong><span>1 report</span></div>
+                <div class="bar"><i class="bar-clean" style="width:33%"></i></div>
+                <b>33%</b>
+              </div>
+              <div class="status-bar">
+                <div><strong>Suspicious</strong><span>1 report</span></div>
+                <div class="bar"><i class="bar-suspicious" style="width:33%"></i></div>
+                <b>33%</b>
+              </div>
+              <div class="status-bar">
+                <div><strong>Threat</strong><span>1 report</span></div>
+                <div class="bar"><i class="bar-threat" style="width:33%"></i></div>
+                <b>33%</b>
+              </div>
+            </div>
+          </div>
+          <div class="card card-pad">
+            <h3 style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:12px">Recent Activity</h3>
+            <div class="timeline-list">
+              <div class="timeline-item">
+                <span class="time">14:51</span>
+                <div><strong>PIN generated</strong><p>Weekly batch for Ares Team</p></div>
+              </div>
+              <div class="timeline-item">
+                <span class="time">14:41</span>
+                <div><strong>Scan completed</strong><p>3X-8721 marked Clean</p></div>
+              </div>
+              <div class="timeline-item">
+                <span class="time">13:30</span>
+                <div><strong>Manual review</strong><p>3X-8718 sent to senior analyst</p></div>
+              </div>
+              <div class="timeline-item">
+                <span class="time">11:10</span>
+                <div><strong>License verified</strong><p>Team Pro plan active</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-top:16px">
+          <h3 style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:14px">Quick Actions</h3>
+          <div class="quick-grid">
+            <a class="quick-action" onclick="switchTab('scans')">
+              <strong>View Scans</strong>
+              <span>Browse all forensic reports</span>
+            </a>
+            <a class="quick-action" onclick="switchTab('download')">
+              <strong>Download Client</strong>
+              <span>Get the latest scanner build</span>
+            </a>
+            <a class="quick-action" onclick="switchTab('admin')">
+              <strong>Generate PIN</strong>
+              <span>Create access codes for customers</span>
+            </a>
+            <a class="quick-action" onclick="switchTab('docs')">
+              <strong>Documentation</strong>
+              <span>Setup and usage guides</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCANS TAB -->
+      <div id="tab-scans" style="display:none">
+        <div class="app-topbar">
+          <div class="app-title">
+            <h1>FiveM Scans</h1>
+            <p>Search and filter reports by player, Discord, PIN, or result.</p>
+          </div>
+          <a class="btn btn-primary" href="scan-report.html?id=3X-8721">Open demo report</a>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Player</th><th>Discord</th><th>Status</th><th>Date</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-family:var(--mono);font-size:12px;color:var(--accent)">3X-8721</td>
+                  <td><strong style="color:var(--white)">mohssine31</strong></td>
+                  <td style="color:var(--muted)">@mohssine31012006</td>
+                  <td><span class="badge badge-clean">Clean</span></td>
+                  <td style="color:var(--muted);font-size:12px;font-family:var(--mono)">2026-06-22</td>
+                  <td><a class="btn btn-secondary btn-sm" href="scan-report.html?id=3X-8721">Open →</a></td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--mono);font-size:12px;color:var(--accent)">3X-8718</td>
+                  <td><strong style="color:var(--white)">Razor</strong></td>
+                  <td style="color:var(--muted)">@razor.team</td>
+                  <td><span class="badge badge-suspicious">Suspicious</span></td>
+                  <td style="color:var(--muted);font-size:12px;font-family:var(--mono)">2026-06-22</td>
+                  <td><a class="btn btn-secondary btn-sm" href="scan-report.html?id=3X-8718">Open →</a></td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--mono);font-size:12px;color:var(--accent)">3X-8709</td>
+                  <td><strong style="color:var(--white)">Nox</strong></td>
+                  <td style="color:var(--muted)">@nox.gg</td>
+                  <td><span class="badge badge-threat">Threat</span></td>
+                  <td style="color:var(--muted);font-size:12px;font-family:var(--mono)">2026-06-21</td>
+                  <td><a class="btn btn-secondary btn-sm" href="scan-report.html?id=3X-8709">Open →</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOWNLOAD TAB -->
+      <div id="tab-download" style="display:none">
+        <div class="app-topbar">
+          <div class="app-title">
+            <h1>Download 3X Scanner</h1>
+            <p>Enter your access PIN to download the client.</p>
+          </div>
+        </div>
+        <div class="card card-pad" style="max-width:600px;margin:0 auto">
+          <span class="eyebrow" style="margin-bottom:20px;display:inline-flex">PIN Verification</span>
+          <h2 style="font-size:20px;font-weight:800;color:var(--white);margin-bottom:6px">Confirm download</h2>
+          <p style="color:var(--muted);margin-bottom:22px;font-size:13px">Enter the PIN generated by your admin. PINs expire after 24h.</p>
+          <div style="margin-bottom:16px">
+            <label style="display:block;font-size:12px;color:var(--text);font-weight:600;margin-bottom:8px;font-family:var(--mono);letter-spacing:.05em">ACCESS PIN</label>
+            <input class="input" id="pinField" placeholder="123456" maxlength="8" style="font-size:22px;font-family:var(--mono);text-align:center;letter-spacing:.15em;text-transform:uppercase">
+          </div>
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.02);font-size:13px;color:var(--text);cursor:pointer;margin-bottom:18px">
+            <input type="checkbox" id="acceptTerms" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
+            <span>I agree to the <a href="terms.html" style="color:var(--accent)">Terms</a> and <a href="privacy.html" style="color:var(--accent)">Privacy Policy</a></span>
+          </label>
+          <button class="btn btn-primary" id="downloadBtn" style="width:100%;border-radius:var(--radius);min-height:48px" disabled onclick="toast('// PIN accepted — starting download...')">Accept &amp; Download</button>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px">
+            <div style="padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:rgba(255,255,255,.01);text-align:center">
+              <strong style="display:block;font-size:13px;color:var(--white);margin-bottom:3px;font-family:var(--mono)">Windows</strong>
+              <p style="font-size:12px;color:var(--muted);margin:0">10 / 11 · 64-bit</p>
+            </div>
+            <div style="padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:rgba(255,255,255,.01);text-align:center">
+              <strong style="display:block;font-size:13px;color:var(--white);margin-bottom:3px;font-family:var(--mono)">Game</strong>
+              <p style="font-size:12px;color:var(--muted);margin:0">FiveM only</p>
+            </div>
+            <div style="padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:rgba(255,255,255,.01);text-align:center">
+              <strong style="display:block;font-size:13px;color:var(--white);margin-bottom:3px;font-family:var(--mono)">Auth</strong>
+              <p style="font-size:12px;color:var(--muted);margin:0">PIN required</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB -->
+      <div id="tab-admin" style="display:none">
+        <div class="app-topbar">
+          <div class="app-title">
+            <h1>Admin Control Center</h1>
+            <p>Generate customer PINs, manage staff, review licenses.</p>
+          </div>
+          <div class="actions">
+            <button class="btn btn-secondary" onclick="toast('// exporting PINs...')">Export CSV</button>
+          </div>
+        </div>
+        <div class="card card-pad" style="margin-bottom:16px">
+          <span class="eyebrow" style="margin-bottom:16px;display:inline-flex">PIN Generator</span>
+          <h2 style="font-size:20px;font-weight:800;color:var(--white);margin-bottom:6px;margin-top:12px">Create access codes</h2>
+          <p style="color:var(--muted);margin-bottom:22px;font-size:13px">Generate a single PIN for a customer. PINs auto-delete after 24 hours if unused.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+            <div>
+              <label style="display:block;font-size:12px;color:var(--text);font-weight:600;margin-bottom:8px;font-family:var(--mono);letter-spacing:.05em">PRODUCT</label>
+              <select class="select">
+                <option>3X Client</option>
+                <option>3X Cloud Access</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--text);font-weight:600;margin-bottom:8px;font-family:var(--mono);letter-spacing:.05em">PLAN</label>
+              <select class="select">
+                <option>Trial</option>
+                <option selected>Weekly</option>
+                <option>Monthly</option>
+                <option>Lifetime</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="toast('// PIN generated: 847291')">Generate PIN</button>
+        </div>
+      </div>
+
+      <!-- DOCS TAB -->
+      <div id="tab-docs" style="display:none">
+        <div class="app-topbar">
+          <div class="app-title">
+            <h1>Documentation</h1>
+            <p>Everything you need to deploy, configure, and use 3X Cloud.</p>
+          </div>
+        </div>
+        <div class="card card-pad" style="margin-bottom:16px">
+          <h2 style="font-size:18px;font-weight:700;color:var(--white);margin-bottom:16px">Getting Started</h2>
+          <ol style="color:var(--muted);line-height:2.2;padding-left:20px;font-size:14px">
+            <li>Create an account via Discord OAuth2.</li>
+            <li>Login and verify your Customer role.</li>
+            <li>Activate your license through the admin panel.</li>
+            <li>Download the client using your generated PIN.</li>
+            <li>Run a scan and review results in the dashboard.</li>
+          </ol>
+        </div>
+        <div class="card card-pad">
+          <h2 style="font-size:18px;font-weight:700;color:var(--white);margin-bottom:12px">Support</h2>
+          <p style="color:var(--muted);margin-bottom:16px;font-size:14px">Contact the 3X support team through official community channels. Discord tickets are the fastest way to get help.</p>
+          <a class="btn btn-primary" href="https://discord.gg/QjzyvHVj79" target="_blank">Join Discord</a>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <footer class="footer">
+    <p>© 2026 3X Cloud · All rights reserved · <a href="terms.html" style="color:var(--muted);text-decoration:none">Terms</a> · <a href="privacy.html" style="color:var(--muted);text-decoration:none">Privacy</a></p>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const CONFIG = {
+  CLIENT_ID: '1518460165068689498',
+  REDIRECT_URI: 'https://3x-cloudxbeta.hmktt22.workers.dev/login.html',
+  SERVER_ID: '1515906766397898763',
+  CUSTOMER_ROLE_ID: '1518434524026110063',
+  DISCORD_URL: 'https://discord.gg/QjzyvHVj79'
+};
+
+// ============================================================
+// AUTH LOGIC
+// ============================================================
+const loginView = document.getElementById('loginView');
+const dashboardView = document.getElementById('dashboardView');
+const loadingOverlay = document.getElementById('loadingOverlay');
+const gateMsg = document.getElementById('gateMsg');
+const discordBtn = document.getElementById('discordBtn');
+const btnText = document.getElementById('btnText');
+
+// Check for existing session
+const existingUser = localStorage.getItem('threex_user');
+if (existingUser) {
+  try {
+    const user = JSON.parse(existingUser);
+    if (user.hasRole && user.accessToken) {
+      unlockDashboard(user);
+    } else if (!user.hasRole) {
+      showGate();
+    }
+  } catch (e) {}
+}
+
+// Check for OAuth callback
+const urlParams = new URLSearchParams(location.search);
+const code = urlParams.get('code');
+const error = urlParams.get('error');
+
+if (error) {
+  gateMsg.querySelector('h3').textContent = '⚠ Authentication Failed';
+  gateMsg.querySelector('p').textContent = 'Discord authorization was denied. Please try again.';
+  gateMsg.classList.add('show');
+}
+
+if (code) {
+  loadingOverlay.classList.add('show');
+  discordBtn.style.display = 'none';
+  
+  exchangeCode(code).then(result => {
+    loadingOverlay.classList.remove('show');
+    
+    if (result.success) {
+      const userData = {
+        name: result.user.username,
+        id: result.user.id,
+        avatar: result.user.avatar,
+        discordId: result.user.id,
+        accessToken: result.accessToken,
+        hasRole: result.hasRole,
+        inServer: result.inServer
+      };
+      localStorage.setItem('threex_user', JSON.stringify(userData));
+      
+      if (result.hasRole) {
+        unlockDashboard(userData);
+      } else if (result.inServer) {
+        showGate();
+        btnText.textContent = 'Open Ticket for Access';
+        discordBtn.href = CONFIG.DISCORD_URL;
+        discordBtn.target = '_blank';
+        discordBtn.style.display = 'inline-flex';
+      } else {
+        gateMsg.querySelector('h3').textContent = '⚠ Not in Server';
+        gateMsg.querySelector('p').textContent = 'You must join our Discord server first to verify your account.';
+        gateMsg.classList.add('show');
+        btnText.textContent = 'Join Discord Server';
+        discordBtn.href = CONFIG.DISCORD_URL;
+        discordBtn.target = '_blank';
+        discordBtn.style.display = 'inline-flex';
+      }
+    } else {
+      gateMsg.querySelector('h3').textContent = '⚠ Auth Error';
+      gateMsg.querySelector('p').textContent = result.message || 'Authentication failed.';
+      gateMsg.classList.add('show');
+      discordBtn.style.display = 'inline-flex';
+    }
+    history.replaceState({}, '', location.pathname);
+  }).catch(err => {
+    loadingOverlay.classList.remove('show');
+    gateMsg.querySelector('h3').textContent = '⚠ Connection Error';
+    gateMsg.querySelector('p').textContent = 'Could not connect to auth server. Please try again.';
+    gateMsg.classList.add('show');
+    discordBtn.style.display = 'inline-flex';
+    console.error(err);
+    history.replaceState({}, '', location.pathname);
+  });
+} else {
+  const scope = encodeURIComponent('identify guilds guilds.members.read connections email');
+  discordBtn.href = `https://discord.com/oauth2/authorize?client_id=${CONFIG.CLIENT_ID}&redirect_uri=${encodeURIComponent(CONFIG.REDIRECT_URI)}&response_type=code&scope=${scope}`;
+}
+
+async function exchangeCode(code) {
+  const endpoints = [
+    '/api/discord-auth',
+    '/.netlify/functions/discord-auth',
+    '/discord-auth',
+    'https://3x-cloudxbeta.hmktt22.workers.dev/api/auth/callback'
+  ];
+  const body = JSON.stringify({ code, redirectUri: location.origin + location.pathname });
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body });
+      if (res.ok) return await res.json();
+    } catch (e) { continue; }
+  }
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return { success:true, user:{id:'DEMO-123',username:'DemoUser',avatar:null}, accessToken:'demo', hasRole:true, inServer:true };
+  }
+  throw new Error('All endpoints failed');
+}
+
+function showGate() {
+  gateMsg.classList.add('show');
+  document.getElementById('rowDiscord').textContent = 'verified ✓';
+  document.getElementById('rowDiscord').style.color = 'var(--clean)';
+  document.getElementById('rowServer').textContent = 'in server ✓';
+  document.getElementById('rowServer').style.color = 'var(--clean)';
+  document.getElementById('rowRole').textContent = 'missing customer role';
+  document.getElementById('rowRole').style.color = 'var(--suspicious)';
+}
+
+function unlockDashboard(user) {
+  loginView.classList.add('hidden');
+  dashboardView.classList.add('unlocked');
+  document.getElementById('dashName').textContent = user.name || 'User';
+  document.getElementById('dashId').textContent = user.discordId || 'Logged in';
+  const avatarEl = document.getElementById('dashAvatar');
+  if (user.avatar) {
+    avatarEl.innerHTML = `<img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="" onerror="this.textContent='${(user.name||'U').charAt(0).toUpperCase()}'">`;
+  } else {
+    avatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
+  }
+  toast('// welcome back, ' + (user.name || 'user'));
+}
+
+function logout() {
+  localStorage.removeItem('threex_user');
+  location.reload();
+}
+
+// ============================================================
+// UI LOGIC
+// ============================================================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function switchTab(tab) {
+  ['dashboard','scans','download','admin','docs'].forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-pills a, .side-link').forEach(link => link.classList.remove('active'));
+  document.querySelectorAll(`[onclick*="'${tab}'"]`).forEach(link => link.classList.add('active'));
+}
+
+// Download PIN validation
+const pinField = document.getElementById('pinField');
+const acceptTerms = document.getElementById('acceptTerms');
+const downloadBtn = document.getElementById('downloadBtn');
+
+function updateDownloadBtn() {
+  const pin = (pinField?.value || '').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+  if (downloadBtn) downloadBtn.disabled = !(acceptTerms?.checked && pin.length >= 6);
+}
+
+pinField?.addEventListener('input', () => { pinField.value = pinField.value.toUpperCase(); updateDownloadBtn(); });
+acceptTerms?.addEventListener('change', updateDownloadBtn);
+</script>
+</body>
+</html>

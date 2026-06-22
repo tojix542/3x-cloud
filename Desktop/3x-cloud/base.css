@@ -1,0 +1,157 @@
+:root{
+  --bg:#0a0a0f;
+  --bg-2:#111118;
+  --bg-3:#16161f;
+  --panel:rgba(17,17,24,.92);
+  --panel-2:rgba(22,22,31,.85);
+  --stroke:rgba(122,44,255,.14);
+  --stroke-strong:rgba(122,44,255,.35);
+  --text:#f0f0f5;
+  --text-2:#e2e2ea;
+  --muted:#9ca3af;
+  --dim:#6b7280;
+  --purple:#7a2cff;
+  --purple-2:#9f55ff;
+  --purple-3:#4d148e;
+  --teal:#00d4aa;
+  --teal-2:#10b981;
+  --blue:#3b82f6;
+  --danger:#ef4444;
+  --warn:#f59e0b;
+  --ok:#10b981;
+  --radius-xl:24px;
+  --radius-lg:18px;
+  --radius-md:12px;
+  --shadow:0 20px 50px rgba(0,0,0,.45);
+  --glow:0 0 30px rgba(122,44,255,.22);
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  margin:0;
+  min-height:100vh;
+  font-family:var(--font);
+  color:var(--text);
+  background:var(--bg);
+  overflow-x:hidden;
+  line-height:1.6;
+}
+body::before {
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 15% 0%,rgba(122,44,255,.10),transparent 35rem),
+    radial-gradient(circle at 85% 10%,rgba(90,31,174,.08),transparent 32rem),
+    radial-gradient(circle at 50% 100%,rgba(0,212,170,.06),transparent 30rem);
+  z-index:-3;
+}
+a { color:inherit; text-decoration:none; }
+img,svg { max-width:100%; display:block; }
+button,input,select,textarea { font:inherit; color:inherit; }
+::selection { background:rgba(122,44,255,.45); color:#fff; }
+
+.container { width:min(1200px,calc(100% - 32px)); margin-inline:auto; }
+.section { padding:100px 0; }
+.section-tight { padding:60px 0; }
+
+.eyebrow {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:var(--purple-2);
+  border:1px solid var(--stroke);
+  background:rgba(122,44,255,.08);
+  border-radius:999px;
+  padding:7px 14px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.eyebrow::before {
+  content:"";
+  width:6px;height:6px;border-radius:50%;
+  background:var(--purple-2);
+  box-shadow:0 0 10px var(--purple-2);
+}
+
+h1,h2,h3,h4,p { margin-top:0; }
+h1 { font-size:clamp(40px,6vw,80px); line-height:1.0; letter-spacing:-.04em; margin-bottom:20px; font-weight:800; }
+h2 { font-size:clamp(30px,4vw,52px); line-height:1.05; letter-spacing:-.03em; margin-bottom:16px; font-weight:800; }
+h3 { font-size:22px; letter-spacing:-.01em; margin-bottom:10px; font-weight:700; }
+h4 { font-size:16px; font-weight:700; margin-bottom:6px; }
+p { color:var(--muted); line-height:1.7; }
+.lead { font-size:18px; max-width:640px; color:var(--text-2); }
+
+.gradient-text {
+  background:linear-gradient(92deg,#fff 0%,#d9c8ff 38%,var(--purple) 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.muted { color:var(--muted); }
+.dim { color:var(--dim); }
+.mono { font-family:var(--mono); }
+.kbd {
+  font-family:var(--mono);
+  font-size:12px;
+  padding:4px 8px;
+  border:1px solid var(--stroke);
+  border-radius:8px;
+  background:rgba(255,255,255,.04);
+}
+.hide { display:none!important; }
+
+.badge-clean { background:rgba(16,185,129,.12); color:#a7f3d0; border:1px solid rgba(16,185,129,.3); }
+.badge-suspicious { background:rgba(245,158,11,.12); color:#fde68a; border:1px solid rgba(245,158,11,.3); }
+.badge-threat { background:rgba(239,68,68,.12); color:#fecaca; border:1px solid rgba(239,68,68,.3); }
+.badge-info { background:rgba(59,130,246,.12); color:#bfdbfe; border:1px solid rgba(59,130,246,.3); }
+.badge-deleted { background:rgba(139,92,246,.12); color:#ddd6fe; border:1px solid rgba(139,92,246,.3); }
+.badge-execution { background:rgba(236,72,153,.12); color:#fbcfe8; border:1px solid rgba(236,72,153,.3); }
+
+.trust-pill {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.03);
+  font-size:13px;
+  color:var(--text-2);
+  font-weight:600;
+}
+.trust-pill .icon { font-size:16px; }
+
+.game-chip {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 18px;
+  border-radius:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--text-2);
+  font-weight:700;
+  font-size:14px;
+  transition:.2s;
+}
+.game-chip:hover { border-color:var(--stroke-strong); background:rgba(122,44,255,.08); }
+
+.step-num {
+  display:inline-grid;
+  place-items:center;
+  width:44px;height:44px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--purple),var(--purple-2));
+  color:#fff;
+  font-weight:900;
+  font-size:16px;
+  margin-bottom:14px;
+}
+
+.reveal { opacity:1; transform:none; }

@@ -1,0 +1,148 @@
+{
+  "version": "3.0-NAPSE",
+  "description": "3X Forensic Scanner Detection Rules — NAPSE PC Check Edition",
+  "updated": "2026-06-22",
+
+  "auth_domains": [
+    "keyauth.win", "keyauth.com", "keyauth.me", "keyauth.cc",
+    "api.keyauth", "auth.gg", "auth-api.com", "sellix.io",
+    "sell.app", "whop.com", "whop.io", "paymentwall.com",
+    "hxcheats.com", "susano.re", "redengine.com", "eulen.app",
+    "phaze.dev", "vortex.menu", "crownmenu.com", "skript.gg",
+    "nexus-re.dev", "tzproject.com", "keyser.software",
+    "gosth.menu", "degeo.dev", "asgard.cheats", "lynxmenu.com",
+    "brutan.dev", "galaxy.menu", "melon.menu", "maestro.dev",
+    "omwj.pl", "shadowx.eu", "titomodz.com", "tiago.menu",
+    "ghx.dev", "schlafenleger.de", "komischer.eu", "hor4cs.com",
+    "420spoofer.com", "stringless.dev", "ravenx.wtf", "ghostbypass.com",
+    "softaim.dev", "darkside.menu", "aimbotdll.com", "damageboost.rpf",
+    "fastrun.dev", "stamina.mod", "settings.cock", "config.json",
+    "cheatdevlabs.com", "recoverykings.com", "fivemcracked.com"
+  ],
+
+  "c2_patterns": [
+    "cdn.cheat", "cdn.loader", "cdn.menu", "cdn.injector",
+    "update.cheat", "update.loader", "update.menu", "update.bypass",
+    "api.cheat", "api.loader", "api.menu", "api.auth",
+    "panel.cheat", "panel.loader", "panel.menu", "panel.dashboard",
+    "download.cheat", "download.loader", "download.menu", "download.injector",
+    "injector.download", "bypass.download", "spoofer.download", "undetected.download",
+    "loader.cdn", "menu.cdn", "bypass.cdn", "spoofer.cdn",
+    "cheat.api", "loader.api", "menu.api", "auth.api",
+    "webhook.site", "discordapp.com/api/webhooks", "pastebin.com",
+    "github.com/raw", "gitlab.com", "bitbucket.org"
+  ],
+
+  "vulnerable_drivers": [
+    "iqvw64e.sys", "gdrv.sys", "nvoclock.sys", "cpuz.sys",
+    "rtcore64.sys", "amifldrv64.sys", "winring0x64.sys",
+    "winring0.sys", "gmer64.sys", "gmer.sys", "dbk64.sys",
+    "dbk32.sys", "kprocesshacker.sys", "processhacker.sys",
+    "npf.sys", "pcap.sys", "lha.sys", "hwinfo64.sys",
+    "hwinfo32.sys", "aswArPots.sys", "capcom.sys", "dsefix.sys",
+    "turla.sys", "mimidrv.sys", "procexp.sys", "procexp64.sys",
+    "msio64.sys", "physmem.sys", "psexesvc.sys", "psexec.sys"
+  ],
+
+  "dma_device_patterns": [
+    {"vid": "0x10EE", "pid": ""},
+    {"vid": "0x1172", "pid": ""},
+    {"vid": "0x1D50", "pid": ""},
+    {"vid": "0x0403", "pid": ""},
+    {"vid": "0x0483", "pid": ""},
+    {"vid": "0x16C0", "pid": ""},
+    {"vid": "0x2341", "pid": ""},
+    {"vid": "0x03EB", "pid": ""},
+    {"vid": "0x1363", "pid": ""},
+    {"vid": "0x1A86", "pid": ""},
+    {"vid": "", "pid": "0x6010"},
+    {"vid": "", "pid": "0x6011"},
+    {"vid": "", "pid": "0x6014"},
+    {"vid": "", "pid": "0x6810"}
+  ],
+
+  "cheat_path_patterns": [
+    "\\cheat", "\\hack", "\\injector", "\\loader", "\\bypass",
+    "\\spoofer", "\\undetected", "\\modmenu", "\\mod menu",
+    "\\executor", "\\exploit", "\\triggerbot", "\\aimbot",
+    "\\esp", "\\wallhack", "\\speedhack", "\\teleport",
+    "\\noclip", "\\godmode", "\\infinite", "\\moneydrop",
+    "\\recovery", "\\boost", "\\carry", "\\ranked",
+    "\\paid", "\\premium", "\\vip", "\\private",
+    "\\slotted", "\\lifetime", "\\reseller", "\\cracked",
+    "\\redengine", "\\eulen", "\\phaze", "\\vortex",
+    "\\crown", "\\skript", "\\nexus", "\\tz",
+    "\\keyser", "\\gosth", "\\susano", "\\hx",
+    "\\lynx", "\\brutan", "\\galaxy", "\\melon",
+    "\\maestro", "\\omwj", "\\shadowx", "\\tito",
+    "\\tiago", "\\ghx", "\\schlafenleger", "\\komischer",
+    "\\hor4cs", "\\420", "\\stringless", "\\ravenx",
+    "\\ghost", "\\softaim", "\\darkside", "\\aimbot",
+    "\\damageboost", "\\fastrun", "\\stamina", "\\settings.cock",
+    "\\config.json", "\\cheatdev", "\\recovery", "\\cracked",
+    "\\napse", "\\ocean", "\\echo", "\\storm"
+  ],
+
+  "memory_patterns": [
+    "inject", "bypass", "spoofer", "undetected", "modmenu",
+    "executor", "exploit", "triggerbot", "aimbot", "esp",
+    "wallhack", "speedhack", "teleport", "noclip", "godmode",
+    "infinite", "moneydrop", "recovery", "boost", "carry",
+    "ranked", "paid", "premium", "vip", "private", "slotted",
+    "lifetime", "reseller", "cracked", "keyauth", "auth.gg",
+    "sellix", "whop", "loader", "injector", "bypass",
+    "redengine", "eulen", "phaze", "vortex", "crown",
+    "skript", "nexus", "tz", "keyser", "gosth",
+    "susano", "hx", "lynx", "brutan", "galaxy",
+    "melon", "maestro", "omwj", "shadowx", "tito",
+    "tiago", "ghx", "schlafenleger", "komischer", "hor4cs",
+    "420spoofer", "stringless", "ravenx", "ghost", "softaim",
+    "darkside", "aimbotdll", "damageboost", "fastrun", "stamina",
+    "settings.cock", "config.json", "cheatdev", "recoverykings",
+    "cracked", "napse", "ocean", "echo", "storm",
+    "manual_map", "thread_hijack", "apc_inject", "process_hollow",
+    "reflective_dll", "shellcode", "rwxx", "rwx", "execute_readwrite"
+  ],
+
+  "anti_forensic_indicators": [
+    "ccleaner", "bleachbit", "privazer", "wiping", "shredder",
+    "eraser", "securedelete", "fileshredder", "diskwipe",
+    "cipher.exe", "sdelete", "cipher", "format", "clean",
+    "clear", "delete", "remove", "wipe", "shred", "erase",
+    "overwrite", "zero", "null", "random", "secure", "military",
+    "dod", "nsa", "gutmann", "petergutmann", "bruce schneier",
+    "rcmp", "navso", "afssi", "5020", "clearlogs", "eventclean",
+    "logclean", "clearlog", "cleanlog", "eventclear", "logclear",
+    "napse", "ocean", "echo", "storm", "stringless", "ravenx",
+    "ghost_cleaner", "bypass_cleaner", "trace_wiper", "evidence_removal",
+    "usn_delete", "journal_clear", "prefetch_wipe", "amcache_clean",
+    "bam_delete", "srum_wipe", "shellbag_clear", "muicache_clean",
+    "userassist_wipe", "recentdocs_clear", "lastvisited_clear"
+  ],
+
+  "lua_cheat_patterns": [
+    "menu", "executor", "inject", "bypass", "godmode",
+    "noclip", "teleport", "esp", "aimbot", "triggerbot",
+    "money", "drop", "spawn", "giveweapon", "givecar",
+    "sethealth", "setarmour", "setcoords", "freeze", "kill",
+    "crash", "kick", "ban", "nuke", "troll",
+    "redengine", "eulen", "phaze", "vortex", "crown",
+    "skript", "lynx", "brutan", "galaxy", "melon",
+    "maestro", "omwj", "shadowx", "tito", "tiago",
+    "ghx", "schlafenleger", "komischer", "hor4cs"
+  ],
+
+  "discord_cheat_patterns": [
+    "discord.gg/redengine", "discord.gg/eulen", "discord.gg/phaze",
+    "discord.gg/vortex", "discord.gg/crown", "discord.gg/skript",
+    "discord.gg/lynx", "discord.gg/brutan", "discord.gg/galaxy",
+    "discord.gg/melon", "discord.gg/maestro", "discord.gg/omwj",
+    "discord.gg/shadowx", "discord.gg/tito", "discord.gg/tiago",
+    "discord.gg/ghx", "discord.gg/420", "discord.gg/stringless",
+    "discord.gg/ravenx", "discord.gg/ghost", "discord.gg/softaim",
+    "discord.gg/darkside", "discord.gg/aimbot", "discord.gg/recovery",
+    "discord.gg/cracked", "discord.gg/bypass", "discord.gg/spoofer",
+    "discord.gg/cheats", "discord.gg/hacks", "discord.gg/modmenu",
+    "discord.gg/executor", "discord.gg/lua", "discord.gg/fivem"
+  ]
+}

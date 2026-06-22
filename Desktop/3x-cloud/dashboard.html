@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3X Cloud - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h1>3X CLOUD</h1>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">Dashboard</a>
+            <a href="#scans">Scans</a>
+            <a href="#settings">Settings</a>
+            <span id="user-info">Loading...</span>
+            <a href="login.html" class="logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card critical">
+                <h3>Critical</h3>
+                <span class="stat-value" id="stat-critical">0</span>
+            </div>
+            <div class="stat-card high">
+                <h3>High</h3>
+                <span class="stat-value" id="stat-high">0</span>
+            </div>
+            <div class="stat-card medium">
+                <h3>Medium</h3>
+                <span class="stat-value" id="stat-medium">0</span>
+            </div>
+            <div class="stat-card low">
+                <h3>Low</h3>
+                <span class="stat-value" id="stat-low">0</span>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Recent Scans</h2>
+            <div id="scans-list" class="scans-list">
+                <p class="loading">Loading scans...</p>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Scan Details</h2>
+            <div id="scan-details" class="scan-details">
+                <p>Select a scan to view details</p>
+            </div>
+        </div>
+
+        <div class="panel" id="role-gate" style="display:none;">
+            <h2>Access Restricted</h2>
+            <p>You need the <strong>Customer</strong> role to view full scan results.</p>
+            <p>Contact an administrator to get access.</p>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,7 +1,12 @@
 name = "3x-cloudxbeta"
 main = "worker.js"
-compatibility_date = "2026-06-20"
+compatibility_date = "2026-06-23"
 
+# KV binding for sessions
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "146ed660f5e843bf88e7397402c4fef9"
+id = "YOUR_KV_NAMESPACE_ID"
+
+# Secrets (DO NOT put values here — use `wrangler secret put` or Cloudflare Dashboard)
+# DISCORD_BOT_TOKEN = "set via dashboard or wrangler secret put"
+# DISCORD_CLIENT_SECRET = "set via dashboard or wrangler secret put"

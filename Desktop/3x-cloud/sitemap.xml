@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://yourdomain.com/</loc></url>
+  <url><loc>https://yourdomain.com/pages/pricing.html</loc></url>
+  <url><loc>https://yourdomain.com/pages/download.html</loc></url>
+  <url><loc>https://yourdomain.com/pages/login.html</loc></url>
+  <url><loc>https://yourdomain.com/pages/dashboard.html</loc></url>
+  <url><loc>https://yourdomain.com/pages/scans.html</loc></url>
+  <url><loc>https://yourdomain.com/pages/scan-report.html</loc></url>
+  <url><loc>https://yourdomain.com/pages/admin.html</loc></url>
+  <url><loc>https://yourdomain.com/pages/docs.html</loc></url>
+  <url><loc>https://yourdomain.com/pages/terms.html</loc></url>
+  <url><loc>https://yourdomain.com/pages/privacy.html</loc></url>
+</urlset>

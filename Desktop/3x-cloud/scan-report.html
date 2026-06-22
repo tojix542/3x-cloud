@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trace Analysis — 3X Signal</title>
+<link rel="icon" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0f;color:#e2e2ea;line-height:1.6;overflow-x:hidden}
+::selection{background:rgba(123,97,255,.4);color:#fff}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(123,97,255,.08),transparent),radial-gradient(ellipse 60% 40% at 80% 0%,rgba(90,70,174,.05),transparent)}
+
+.site-header{position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(10,10,15,.85);backdrop-filter:blur(20px)}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 24px;max-width:1200px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-.03em;font-size:20px;color:#fff;text-decoration:none}
+.brand img{width:36px;height:36px;border-radius:8px}
+.brand span{font-size:20px;color:#fff}
+.brand small{display:block;font-size:10px;color:#6b7280;letter-spacing:.15em;text-transform:uppercase;margin-top:-2px;font-weight:600}
+.nav-links{display:flex;align-items:center;gap:4px;padding:4px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);border-radius:999px}
+.nav-links a{font-size:14px;color:#9ca3af;padding:9px 16px;border-radius:999px;transition:.2s ease;font-weight:500;text-decoration:none}
+.nav-links a:hover,.nav-links a.active{background:rgba(123,97,255,.15);color:#fff}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.btn{border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;font-weight:700;font-size:14px;letter-spacing:-.01em;transition:transform .2s,box-shadow .2s,background .2s;user-select:none;white-space:nowrap;text-decoration:none}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,#7b61ff,#9f7eff);box-shadow:0 12px 36px rgba(123,97,255,.3);color:#fff}
+.btn-primary:hover{box-shadow:0 16px 48px rgba(123,97,255,.4)}
+.btn-secondary{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff}
+.btn-secondary:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08)}
+.btn-sm{min-height:36px;padding:0 14px;font-size:13px}
+.btn-lg{min-height:52px;padding:0 28px;font-size:15px}
+
+.card{border:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border-radius:20px;box-shadow:0 16px 40px rgba(0,0,0,.3);position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 0%,rgba(123,97,255,.08),transparent 30rem);pointer-events:none}
+.card>*{position:relative;z-index:1}
+.card-pad{padding:32px}
+
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:#9f7eff;border:1px solid rgba(123,97,255,.2);background:rgba(123,97,255,.08);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:#9f7eff;box-shadow:0 0 10px #9f7eff}
+h1{font-size:clamp(40px,6vw,72px);line-height:1.0;letter-spacing:-.04em;font-weight:800;color:#fff;margin-bottom:20px}
+h2{font-size:clamp(24px,3vw,32px);font-weight:700;color:#fff;margin-bottom:12px}
+h3{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+
+.app-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 72px)}
+.sidebar{border-right:1px solid rgba(255,255,255,.06);background:rgba(8,8,12,.7);padding:24px 16px;position:sticky;top:72px;height:calc(100vh - 72px);overflow-y:auto}
+.sidebar-profile{padding:20px;border:1px solid rgba(255,255,255,.06);border-radius:18px;background:rgba(255,255,255,.03);margin-bottom:20px}
+.avatar{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#fff,#7b61ff);display:grid;place-items:center;color:#07030e;font-weight:900;font-size:18px;margin-bottom:12px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.sidebar-profile h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+.sidebar-profile p{font-size:13px;color:#6b7280;font-family:'JetBrains Mono',monospace}
+.side-nav{display:grid;gap:4px}
+.side-link{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;color:#9ca3af;transition:.2s;font-size:14px;font-weight:500;text-decoration:none;border:0;background:transparent;cursor:pointer;width:100%;text-align:left}
+.side-link:hover,.side-link.active{background:rgba(123,97,255,.12);color:#fff}
+
+.app-main{padding:32px;min-width:0}
+.app-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:32px;flex-wrap:wrap}
+.app-title h1{font-size:32px;font-weight:800;color:#fff;margin:0 0 6px}
+.app-title p{font-size:15px;color:#9ca3af;margin:0}
+
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.badge-clean{background:rgba(16,185,129,.12);color:#a7f3d0;border:1px solid rgba(16,185,129,.3)}
+.badge-suspicious{background:rgba(245,158,11,.12);color:#fde68a;border:1px solid rgba(245,158,11,.3)}
+.badge-threat{background:rgba(239,68,68,.12);color:#fecaca;border:1px solid rgba(239,68,68,.3)}
+.badge-info{background:rgba(59,130,246,.12);color:#bfdbfe;border:1px solid rgba(59,130,246,.3)}
+.badge-napse{background:rgba(236,72,153,.12);color:#fbcfe8;border:1px solid rgba(236,72,153,.3)}
+.badge-ocean{background:rgba(6,182,212,.12);color:#a5f3fc;border:1px solid rgba(6,182,212,.3)}
+.badge-echo{background:rgba(139,92,246,.12);color:#ddd6fe;border:1px solid rgba(139,92,246,.3)}
+
+.result-icon{width:80px;height:80px;border-radius:50%;display:grid;place-items:center;margin:0 auto 20px;font-size:32px;font-weight:900}
+.result-icon.clean{background:rgba(16,185,129,.12);color:#10b981;border:2px solid rgba(16,185,129,.3)}
+.result-icon.suspicious{background:rgba(245,158,11,.12);color:#f59e0b;border:2px solid rgba(245,158,11,.3)}
+.result-icon.threat{background:rgba(239,68,68,.12);color:#ef4444;border:2px solid rgba(239,68,68,.3)}
+
+.result-heading{font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.result-heading.clean{color:#10b981}
+.result-heading.suspicious{color:#f59e0b}
+.result-heading.threat{color:#ef4444}
+
+.verdict{padding:20px;border-radius:18px;text-align:center;margin:20px 0}
+.verdict.clean{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2)}
+.verdict.suspicious{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)}
+.verdict.threat{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
+.verdict h3{margin:0 0 8px;font-size:20px}
+.verdict p{margin:0;font-size:14px}
+
+.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.meta-item{text-align:center;padding:14px;border:1px solid rgba(255,255,255,.06);border-radius:14px;background:rgba(255,255,255,.02)}
+.meta-item span{display:block;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.06em}
+.meta-item strong{display:block;font-size:18px;margin-top:4px;color:#fff}
+
+.id-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.id-card{padding:16px;border:1px solid rgba(255,255,255,.06);border-radius:16px;background:rgba(255,255,255,.02)}
+.id-card label{display:block;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px}
+.id-card value{display:block;font-family:'JetBrains Mono',monospace;font-size:13px;color:#e2e2ea;word-break:break-all}
+
+.cheat-section{padding:24px;border:1px solid rgba(255,255,255,.06);border-radius:20px;background:rgba(255,255,255,.02);margin-top:18px}
+.cheat-bar{height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;margin:12px 0}
+.cheat-bar-fill{height:100%;border-radius:999px;transition:width .5s ease}
+.cheat-bar-fill.clean{background:linear-gradient(90deg,#10b981,#a7f3d0)}
+.cheat-bar-fill.suspicious{background:linear-gradient(90deg,#f59e0b,#fde68a)}
+.cheat-bar-fill.threat{background:linear-gradient(90deg,#ef4444,#fecaca)}
+
+.evidence-list{display:grid;gap:10px}
+.evidence{padding:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);border-radius:16px}
+.evidence-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.evidence p{font-size:13px;color:#9ca3af;margin-top:4px}
+.evidence .time{font-size:12px;color:#6b7280;font-family:'JetBrains Mono',monospace;margin-top:6px}
+
+.behavior-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.behavior-card{padding:16px;border:1px solid rgba(255,255,255,.06);border-radius:16px;background:rgba(255,255,255,.02);text-align:center}
+.behavior-card h4{font-size:14px;color:#fff;margin-bottom:8px}
+.behavior-card .score{font-size:28px;font-weight:800}
+.behavior-card .score.napse{color:#ec4899}
+.behavior-card .score.ocean{color:#06b6d4}
+.behavior-card .score.echo{color:#8b5cf6}
+.behavior-card p{font-size:12px;color:#6b7280;margin-top:4px}
+
+.findings-list{display:grid;gap:8px;margin-top:16px}
+.finding{padding:14px;border:1px solid rgba(255,255,255,.06);border-radius:14px;background:rgba(255,255,255,.02);display:flex;align-items:center;gap:12px}
+.finding .risk{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:14px;font-weight:800;flex-shrink:0}
+.finding .risk.critical{background:rgba(239,68,68,.15);color:#ef4444}
+.finding .risk.high{background:rgba(245,158,11,.15);color:#f59e0b}
+.finding .risk.medium{background:rgba(59,130,246,.15);color:#3b82f6}
+.finding .risk.low{background:rgba(16,185,129,.15);color:#10b981}
+.finding div{flex:1}
+.finding div strong{display:block;font-size:14px;color:#fff;margin-bottom:2px}
+.finding div p{font-size:12px;color:#9ca3af;margin:0}
+.finding div span{font-size:11px;color:#6b7280}
+
+.terminal{padding:20px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:#06060a;font-family:'JetBrains Mono',monospace;font-size:13px;color:#b4a8d4}
+.terminal .line{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);padding:10px 0}
+.terminal .line:last-child{border-bottom:0}
+.terminal .line span:first-child{color:#6b7280}
+.terminal .line span:last-child{color:#fff;font-weight:600}
+
+.loading{position:fixed;inset:0;background:rgba(10,10,15,.95);display:flex;align-items:center;justify-content:center;z-index:1000}
+.loading-ring{width:60px;height:60px;border:3px solid rgba(123,97,255,.15);border-top-color:#7b61ff;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.toast{position:fixed;right:20px;bottom:20px;z-index:999;padding:14px 18px;border:1px solid rgba(123,97,255,.3);border-radius:16px;background:rgba(12,8,22,.95);box-shadow:0 16px 40px rgba(0,0,0,.4);transform:translateY(16px);opacity:0;pointer-events:none;transition:.2s;font-size:14px;color:#e2e2ea}
+.toast.show{opacity:1;transform:translateY(0)}
+
+.cheat-traces-section{display:none;margin-top:18px}
+.cheat-traces-section.show{display:block}
+.cheat-trace-item{padding:14px;border:1px solid rgba(239,68,68,.15);border-radius:14px;background:rgba(239,68,68,.04);margin-bottom:10px}
+.cheat-trace-item strong{font-size:14px;color:#ef4444}
+.cheat-trace-item .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:#e2e2ea}
+
+.suspicious-traces-section{display:none;margin-top:18px}
+.suspicious-traces-section.show{display:block}
+.suspicious-trace-item{padding:12px;border:1px solid rgba(245,158,11,.15);border-radius:12px;background:rgba(245,158,11,.03);margin-bottom:8px}
+.suspicious-trace-item strong{font-size:14px;color:#f59e0b}
+
+@media(max-width:1050px){
+.app-layout{grid-template-columns:1fr}
+.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid rgba(255,255,255,.06)}
+.side-nav{display:flex;overflow:auto;gap:6px;padding-bottom:6px}
+.side-link{white-space:nowrap;width:auto}
+.meta-grid{grid-template-columns:1fr}
+.id-grid{grid-template-columns:1fr}
+.behavior-grid{grid-template-columns:1fr}
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav">
+    <a class="brand" href="index.html"><img src="mark.svg" alt="3X"><span>3X Signal<small>Trace Intelligence</small></span></a>
+    <nav class="nav-links" data-nav><a href="index.html">Home</a><a href="pricing.html">Pricing</a><a href="download.html">Download</a><a href="dashboard.html">Dashboard</a><a href="scans.html">Traces</a><a href="admin.html">Admin</a><a href="docs.html">Guide</a></nav>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="login.html">Login</a>
+    </div>
+  </div>
+</header>
+
+<div class="loading" id="loading"><div class="loading-ring"></div></div>
+
+<main class="app-layout" id="appLayout" style="display:none">
+
+<aside class="sidebar">
+  <div class="sidebar-profile">
+    <div class="avatar" id="userAvatar">3X</div>
+    <h3 id="userName">Guest</h3>
+    <p id="userId">Not logged in</p>
+  </div>
+  <nav class="side-nav"><a class="side-link" href="dashboard.html">&#9671; Dashboard</a><a class="side-link" href="admin.html">&#10022; Admin / PINs</a><a class="side-link active" href="scans.html">&#9673; Traces</a><a class="side-link" href="download.html">&#8675; Download</a><a class="side-link" href="docs.html">&#9776; Guide</a><button class="side-link" onclick="logout()">&#9168; Logout</button></nav>
+</aside>
+
+<section class="app-main">
+
+  <div class="app-topbar">
+    <div class="app-title">
+      <p><a href="scans.html" style="color:#6b7280;text-decoration:none">&#8592; Back to traces</a></p>
+      <h1>Trace Analysis <span style="font-family:'JetBrains Mono',monospace;font-size:24px;color:#6b7280" id="reportId">3X-8721</span></h1>
+    </div>
+    <button class="btn btn-primary" onclick="exportReport()">Export trace</button>
+  </div>
+
+  <!-- Result Header -->
+  <div class="card card-pad" style="text-align:center;padding:40px 28px" id="resultCard">
+    <div class="result-icon clean" id="resultIcon">&#10003;</div>
+    <h2 class="result-heading clean" id="resultHeading">CLEAR — NO SIGNALS DETECTED</h2>
+    <p style="color:#6b7280;margin:8px 0 0" id="resultSub">Subject <strong id="rPlayer">Unknown</strong> &#183; <span id="rDate">Loading...</span></p>
+
+    <div class="meta-grid" style="margin-top:24px">
+      <div class="meta-item"><span>Trust Index</span><strong id="rScore" style="color:#10b981">--%</strong></div>
+      <div class="meta-item"><span>Signal Count</span><strong id="rBehavior" style="color:#10b981">--</strong></div>
+      <div class="meta-item"><span>Trace Version</span><strong id="rVersion">3X-SIG-v3.0</strong></div>
+    </div>
+
+    <div class="verdict clean" id="verdict">
+      <h3 id="verdictTitle">&#10003; Subject is CLEAR</h3>
+      <p id="verdictDesc">No anomalous signals detected. All trace checks passed.</p>
+    </div>
+  </div>
+
+  <!-- Ghost Pattern Analysis -->
+  <div class="card card-pad" style="margin-top:18px" id="behaviorCard">
+    <span class="eyebrow">Anomaly Mapping</span>
+    <h2>Ghost Pattern Analysis</h2>
+    <p style="color:#9ca3af;margin-bottom:16px">Signal-based detection of anti-trace techniques, not tool names.</p>
+
+    <div class="behavior-grid" id="behaviorGrid">
+      <div class="behavior-card">
+        <h4>Phantom</h4>
+        <div class="score napse" id="napseScore">0</div>
+        <p>Staggered wipes, timestamp repair, selective purge, AMSI mute, ETW blind</p>
+      </div>
+      <div class="behavior-card">
+        <h4>Drift</h4>
+        <div class="score ocean" id="oceanScore">0</div>
+        <p>Prefetch gaps, registry drift, DNS rewrite, HWID mask</p>
+      </div>
+      <div class="behavior-card">
+        <h4>Shadow</h4>
+        <div class="score echo" id="echoScore">0</div>
+        <p>Memory ghost, LSASS touch, hidden thread, APC, hollowing</p>
+      </div>
+    </div>
+
+    <div class="findings-list" id="findingsList"></div>
+  </div>
+
+  <!-- Shadow Marks -->
+  <div class="card card-pad cheat-traces-section" id="cheatTracesSection">
+    <span class="eyebrow" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:#fecaca">Shadow Marks</span>
+    <h2 style="color:#ef4444">Known Tool Signatures Detected</h2>
+    <p style="color:#9ca3af;margin-bottom:16px">Specific tool fingerprints identified via paths, memory, timestamps, and hashes.</p>
+    <div id="cheatTracesList"></div>
+  </div>
+
+  <!-- Signal Echoes -->
+  <div class="card card-pad suspicious-traces-section" id="suspiciousTracesSection">
+    <span class="eyebrow" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2);color:#fde68a">Signal Echoes</span>
+    <h2 style="color:#f59e0b">Uncertain Indicators</h2>
+    <p style="color:#9ca3af;margin-bottom:16px">Pattern matches that require manual review.</p>
+    <div id="suspiciousTracesList"></div>
+  </div>
+
+  <!-- Host Fingerprint -->
+  <div class="card card-pad" style="margin-top:18px">
+    <span class="eyebrow">Host Fingerprint</span>
+    <h2>Target Host Profile</h2>
+    <p style="color:#9ca3af;margin-bottom:16px">Hardware and OS details collected during trace.</p>
+    <div class="id-grid" id="systemGrid">
+      <div class="id-card"><label>Operating System</label><value id="sysOS">Loading...</value></div>
+      <div class="id-card"><label>CPU</label><value id="sysCPU">Loading...</value></div>
+      <div class="id-card"><label>GPU</label><value id="sysGPU">Loading...</value></div>
+      <div class="id-card"><label>RAM</label><value id="sysRAM">Loading...</value></div>
+      <div class="id-card"><label>Hostname</label><value id="sysHost">Loading...</value></div>
+      <div class="id-card"><label>Username</label><value id="sysUser">Loading...</value></div>
+      <div class="id-card" style="grid-column:1/-1"><label>Hardware ID (HWID)</label><value id="sysHWID">Loading...</value></div>
+    </div>
+  </div>
+
+  <!-- Trace Chronicle -->
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:18px;margin-top:18px">
+    <div class="card card-pad">
+      <span class="eyebrow">Trace Chronicle</span>
+      <h2>Signal Analysis Details</h2>
+      <div class="evidence-list" id="evidenceList" style="margin-top:16px">
+        <div class="evidence"><p>Loading signals...</p></div>
+      </div>
+    </div>
+    <div class="card card-pad">
+      <h3>Host Snapshot</h3>
+      <div class="terminal">
+        <div class="line"><span>Client</span><span id="snapClient">3X Signal v3.0</span></div>
+        <div class="line"><span>Upload</span><span>Secure TLS</span></div>
+        <div class="line"><span>Timestamp</span><span id="snapTime">--</span></div>
+      </div>
+      <h3 style="margin-top:22px">Trace Status</h3>
+      <div class="terminal">
+        <div class="line"><span>Result</span><span class="badge badge-clean" id="snapStatus">CLEAR</span></div>
+        <div class="line"><span>Score</span><span id="snapScore">--%</span></div>
+        <div class="line"><span>Signals</span><span id="snapEvidence">-- items</span></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+</main>
+
+<footer style="border-top:1px solid rgba(255,255,255,.06);background:rgba(6,6,10,.8);padding:40px 24px 24px;text-align:center">
+  <p style="color:#6b7280;font-size:13px">&#169; 2026 3X Signal. All rights reserved.</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="cheat-evidence.js"></script>
+<script src="behavior-detection.js"></script>
+<script>
+const CONFIG = { OWNER_ID: "827236167686291477", API_ENDPOINT: '/scan-upload' };
+function getUser(){return JSON.parse(localStorage.getItem('threex_user')||'null');}
+function isLoggedIn(){const u=getUser();return u&&u.id&&u.accessToken;}
+function logout(){localStorage.removeItem('threex_user');localStorage.removeItem('threex_staff');location.href='login.html';}
+function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function updateUserUI(){const u=getUser();if(u){document.getElementById('userName').textContent=u.name||u.username||'User';document.getElementById('userId').textContent=u.discordId||u.id||'Logged in';if(u.avatar&&u.avatar!=='3X'){document.getElementById('userAvatar').innerHTML=`<img src="https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png" alt="">`;}else{document.getElementById('userAvatar').textContent=(u.name||u.username||'U').charAt(0).toUpperCase();}}}
+
+async function loadScanData() {
+  const params = new URLSearchParams(location.search);
+  const scanId = params.get('id') || '3X-8721';
+  document.getElementById('reportId').textContent = scanId;
+  try {
+    const res = await fetch(`${CONFIG.API_ENDPOINT}?id=${scanId}`);
+    const data = await res.json();
+    if (data.success && data.id) { renderReport(data); }
+    else { renderReport(getDemoData(scanId)); }
+  } catch (err) { renderReport(getDemoData(scanId)); }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('appLayout').style.display = 'grid';
+}
+
+function getDemoData(id) {
+  const scans = window.THREEX_SCANS || [];
+  const scan = scans.find(s => s.id === id) || scans[0];
+  if (!scan) return { id: id, status: 'clean', score: 97, behaviorScore: 0, system: { os: 'Windows 11 x64', cpu: 'Intel i9-13900K', gpu: 'RTX 4090', ram: '32 GB', hostname: 'DESKTOP-3X', username: 'User', hwid: 'A1B2C3D4-E5F6-7890-ABCD-EF1234567890' }, evidence: [{level:'info',title:'Demo Data',detail:'No uploaded trace found. Showing demo data.',time:'--'}], findings: [], isNapseLike: false, isOceanLike: false, isEchoLike: false, timestamp: new Date().toISOString(), version: '3X-SIG-v3.0' };
+  return { id: scan.id, status: scan.status, score: scan.score, behaviorScore: 0, system: { os: 'Windows 11 x64', cpu: 'Intel i9-13900K', gpu: 'RTX 4090', ram: '32 GB', hostname: 'DESKTOP-3X', username: scan.player, hwid: scan.hwid }, evidence: scan.evidence || [], findings: [], isNapseLike: false, isOceanLike: false, isEchoLike: false, timestamp: scan.created, version: '3X-SIG-v3.0' };
+}
+
+function renderReport(data) {
+  const icon = document.getElementById('resultIcon');
+  const heading = document.getElementById('resultHeading');
+  const verdict = document.getElementById('verdict');
+  const vTitle = document.getElementById('verdictTitle');
+  const vDesc = document.getElementById('verdictDesc');
+
+  icon.className = 'result-icon ' + data.status;
+  icon.textContent = data.status === 'clean' ? '&#10003;' : data.status === 'threat' ? '&#10005;' : '!';
+  heading.className = 'result-heading ' + data.status;
+  heading.textContent = data.status === 'clean' ? 'CLEAR — NO SIGNALS DETECTED' : data.status === 'threat' ? 'ALERT — ACTION REQUIRED' : 'UNCERTAIN — MANUAL REVIEW NEEDED';
+  verdict.className = 'verdict ' + data.status;
+  vTitle.textContent = data.status === 'clean' ? '&#10003; Subject is CLEAR' : data.status === 'threat' ? '&#10005; ALERT TRIGGERED' : '! UNCERTAIN ACTIVITY';
+  vDesc.textContent = data.status === 'clean' ? 'No anomalous signals detected. All trace checks passed.' : data.status === 'threat' ? 'Multiple anomalous signals detected. Immediate action recommended.' : 'Some indicators require manual review by a senior analyst.';
+
+  document.getElementById('rScore').textContent = data.score + '%';
+  document.getElementById('rScore').style.color = data.status === 'clean' ? '#10b981' : data.status === 'threat' ? '#ef4444' : '#f59e0b';
+  document.getElementById('rBehavior').textContent = data.behaviorScore || 0;
+  document.getElementById('rBehavior').style.color = (data.behaviorScore || 0) > 60 ? '#ef4444' : (data.behaviorScore || 0) > 30 ? '#f59e0b' : '#10b981';
+  document.getElementById('rVersion').textContent = data.version || '3X-SIG-v3.0';
+  document.getElementById('rDate').textContent = data.timestamp || '--';
+  document.getElementById('rPlayer').textContent = data.system?.username || 'Unknown';
+
+  document.getElementById('napseScore').textContent = data.isNapseLike ? 'DETECTED' : '0';
+  document.getElementById('napseScore').style.color = data.isNapseLike ? '#ec4899' : '#6b7280';
+  document.getElementById('oceanScore').textContent = data.isOceanLike ? 'DETECTED' : '0';
+  document.getElementById('oceanScore').style.color = data.isOceanLike ? '#06b6d4' : '#6b7280';
+  document.getElementById('echoScore').textContent = data.isEchoLike ? 'DETECTED' : '0';
+  document.getElementById('echoScore').style.color = data.isEchoLike ? '#8b5cf6' : '#6b7280';
+
+  const findingsList = document.getElementById('findingsList');
+  if (data.findings && data.findings.length > 0) {
+    findingsList.innerHTML = data.findings.map(f => {
+      const riskClass = f.risk >= 80 ? 'critical' : f.risk >= 60 ? 'high' : f.risk >= 40 ? 'medium' : 'low';
+      return `<div class="finding"><div class="risk ${riskClass}">${f.risk}</div><div><strong>${f.pattern}</strong><p>${f.description}</p><span>Technique: ${f.technique || 'T1070'}</span></div></div>`;
+    }).join('');
+  } else {
+    findingsList.innerHTML = '<div class="finding"><div class="risk low">OK</div><div><strong>No ghost patterns detected</strong><p>System shows no signs of Phantom/Drift/Shadow-style evasion.</p></div></div>';
+  }
+
+  if (data.system) {
+    document.getElementById('sysOS').textContent = data.system.os || 'Unknown';
+    document.getElementById('sysCPU').textContent = data.system.cpu || 'Unknown';
+    document.getElementById('sysGPU').textContent = data.system.gpu || 'Unknown';
+    document.getElementById('sysRAM').textContent = data.system.ram || 'Unknown';
+    document.getElementById('sysHost').textContent = data.system.hostname || 'Unknown';
+    document.getElementById('sysUser').textContent = data.system.username || 'Unknown';
+    document.getElementById('sysHWID').textContent = data.system.hwid || 'Unknown';
+  }
+
+  const evidenceList = document.getElementById('evidenceList');
+  if (data.evidence && data.evidence.length > 0) {
+    evidenceList.innerHTML = data.evidence.map(e => {
+      const badgeClass = e.level === 'clean' ? 'badge-clean' : e.level === 'threat' ? 'badge-threat' : e.level === 'suspicious' ? 'badge-suspicious' : 'badge-info';
+      const label = e.level === 'clean' ? 'CLEAR' : e.level === 'threat' ? 'ALERT' : e.level === 'suspicious' ? 'UNCERTAIN' : 'INFO';
+      return `<div class="evidence"><div class="evidence-top"><strong>${e.title}</strong><span class="badge ${badgeClass}">${label}</span></div><p>${e.detail}</p><div class="time">${e.time}</div></div>`;
+    }).join('');
+  } else {
+    evidenceList.innerHTML = '<div class="evidence"><div class="evidence-top"><strong>No signals collected</strong><span class="badge badge-info">INFO</span></div><p>No trace signals were collected during this run.</p></div>';
+  }
+
+  document.getElementById('snapClient').textContent = data.version || '3X-SIG-v3.0';
+  document.getElementById('snapTime').textContent = data.timestamp ? new Date(data.timestamp).toLocaleString() : '--';
+  document.getElementById('snapStatus').textContent = (data.status === 'clean' ? 'CLEAR' : data.status === 'threat' ? 'ALERT' : 'UNCERTAIN');
+  document.getElementById('snapStatus').className = 'badge badge-' + (data.status || 'info');
+  document.getElementById('snapScore').textContent = (data.score || 0) + '%';
+  document.getElementById('snapEvidence').textContent = (data.evidence || []).length + ' items';
+
+  detectCheatTraces(data);
+}
+
+function detectCheatTraces(data) {
+  const evidence = data.evidence || [];
+  const detectedCheats = [];
+  const suspiciousItems = [];
+
+  evidence.forEach(item => {
+    const detail = (item.detail || '').toLowerCase();
+    const title = (item.title || '').toLowerCase();
+    const combined = detail + ' ' + title;
+
+    for (const [cheatName, cheatData] of Object.entries(window.THREEX_CHEAT_EVIDENCE || {})) {
+      const cheatLower = cheatName.toLowerCase();
+      if (combined.includes(cheatLower) || 
+          cheatData.paths.some(p => combined.includes(p.toLowerCase())) ||
+          cheatData.memory.some(m => combined.includes(m.toLowerCase()))) {
+        if (!detectedCheats.find(c => c.name === cheatName)) {
+          detectedCheats.push({ name: cheatName, paths: cheatData.paths, memory: cheatData.memory, timestamps: cheatData.timestamps, hashes: cheatData.hashes, services: cheatData.services, risk: cheatData.risk });
+        }
+      }
+    }
+
+    const suspiciousPatterns = ['loader', 'injector', 'bypass', 'spoofer', 'cleaner', 'unknown overlay', 'unsigned module', 'suspicious executable', 'modified lua', 'cache manipulation', 'temp executable', 'deleted', 'recycle', 'usn journal', 'shadow copy', 'prefetch', 'amcache', 'bam', 'srum', 'alternate data stream', 'ads', 'hidden file', 'zero-width', 'amsi', 'etw', 'wmi', 'reflective', 'hollow', 'apc', 'thread hijack', 'manual map'];
+    suspiciousPatterns.forEach(pattern => {
+      if (combined.includes(pattern) && item.level !== 'clean') {
+        suspiciousItems.push({ pattern: pattern, title: item.title, detail: item.detail, level: item.level });
+      }
+    });
+  });
+
+  const cheatSection = document.getElementById('cheatTracesSection');
+  const cheatList = document.getElementById('cheatTracesList');
+  if (detectedCheats.length > 0 && cheatSection && cheatList) {
+    cheatSection.classList.add('show');
+    cheatList.innerHTML = detectedCheats.map(cheat => `
+      <div class="cheat-trace-item">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <strong style="font-size:16px;color:#ef4444;">${cheat.name}</strong>
+          <span class="badge badge-threat" style="font-size:11px">RISK ${cheat.risk}</span>
+        </div>
+        ${cheat.paths.length > 0 ? `<div style="margin-bottom:8px;"><span style="font-size:11px;color:#6b7280;text-transform:uppercase;">Detected Paths</span>${cheat.paths.slice(0,5).map(p => `<div class="mono" style="font-size:12px;color:#e2e2ea;margin-top:4px;padding:6px 10px;background:rgba(0,0,0,.3);border-radius:8px;">${p}</div>`).join('')}</div>` : ''}
+        ${cheat.memory.length > 0 ? `<div style="margin-bottom:8px;"><span style="font-size:11px;color:#6b7280;text-transform:uppercase;">Memory Addresses</span>${cheat.memory.slice(0,5).map(m => `<div class="mono" style="font-size:12px;color:#9f7eff;margin-top:4px;padding:6px 10px;background:rgba(123,97,255,.08);border-radius:8px;">${m}</div>`).join('')}</div>` : ''}
+        ${cheat.timestamps.length > 0 ? `<div style="margin-bottom:8px;"><span style="font-size:11px;color:#6b7280;text-transform:uppercase;">Execution Timestamps</span>${cheat.timestamps.slice(0,3).map(t => `<div class="mono" style="font-size:12px;color:#f59e0b;margin-top:4px;padding:6px 10px;background:rgba(245,158,11,.08);border-radius:8px;">${t}</div>`).join('')}</div>` : ''}
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);"><span style="font-size:11px;color:#6b7280;">Detected via: ${cheat.services.join(', ')}</span></div>
+      </div>`).join('');
+  }
+
+  const susSection = document.getElementById('suspiciousTracesSection');
+  const susList = document.getElementById('suspiciousTracesList');
+  if (suspiciousItems.length > 0 && susSection && susList) {
+    susSection.classList.add('show');
+    susList.innerHTML = suspiciousItems.map(item => `
+      <div class="suspicious-trace-item">
+        <strong style="font-size:14px;color:#f59e0b;">${item.title}</strong>
+        <p style="font-size:13px;color:#9ca3af;margin:4px 0 0;">${item.detail}</p>
+        <span style="font-size:11px;color:#6b7280;margin-top:4px;display:block;">Pattern match: ${item.pattern}</span>
+      </div>`).join('');
+  }
+}
+
+function exportReport() { toast('Trace exported'); }
+
+document.addEventListener('DOMContentLoaded', function() {
+  updateUserUI();
+  loadScanData();
+});
+</script>
+</body>
+</html>
